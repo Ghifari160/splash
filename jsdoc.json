@@ -1,0 +1,20 @@
+{
+    "plugins": [
+        "plugins/markdown"
+    ],
+    "sourceType": "module",
+    "source":
+    {
+        "include": [ "src/server" ]
+    },
+    "opts":
+    {
+        "readme": "readme.md",
+        "destination": "docs"
+    },
+    "templates":
+    {
+        "cleverLinks": true,
+        "default": { "outputSourceFiles": false }
+    }
+}
