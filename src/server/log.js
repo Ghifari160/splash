@@ -22,8 +22,8 @@ const LOG_LEVEL =
 
 /**
  * Gets timestamp
- * @private
  * 
+ * @private
  * @param {Date} date 
  */
 function __getTimestamp(date)
@@ -43,8 +43,8 @@ function __getTimestamp(date)
 
 /**
  * Creates a log entry
- * @static
  * 
+ * @static
  * @param {module:log.LOG_LEVEL} level Log level
  * @param {string} message Message to log
  */
@@ -55,8 +55,8 @@ function log(level, message)
 
 /**
  * Formats HTTP response code
- * @private
  * 
+ * @private
  * @param {number} code HTTP response code
  * 
  * @returns {string} Formatted _and colorized_ HTTP response code
@@ -83,8 +83,8 @@ function __formatHttpCode(code)
 
 /**
  * Logs HTTP request
- * @static
  * 
+ * @static
  * @param {module:log.LOG_LEVEL} level Log level. Under normal condition _(including during HTTP errors)_, the log level should be `INFO`
  * @param {string} method Request method (i.e. `GET`)
  * @param {string} path Request path (i.e. `/`)
@@ -101,8 +101,8 @@ function log_request(level, method, path, domain, project_id, code, exec_start, 
 
 /**
  * Logs HTTP redirects resulting from request
- * @static
  * 
+ * @static
  * @param {module:log.LOG_LEVEL} level Log level. Under normal condition _(including during HTTP errors)_, the log level should be `INFO`
  * @param {string} method Request method (i.e. `GET`)
  * @param {string} path Request path (i.e. `/`)

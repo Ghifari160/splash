@@ -18,8 +18,8 @@ const COLOR = require("./color"),
 
 /**
  * Request stack for error tracing
- * @static
  * 
+ * @static
  * @type {module:error-handler.Request[]}
  * 
  */
@@ -27,8 +27,8 @@ let errorReqStack = [];
 
 /**
  * Express error handler.
- * @static
  * 
+ * @static
  * @param {object} err 
  * @param {object} req 
  * @param {object} res 

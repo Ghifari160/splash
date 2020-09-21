@@ -16,8 +16,8 @@ const config_location = "data/config.json",
 
 /**
  * Sanitizes config version object
- * @private
  * 
+ * @private
  * @param {module:config-loader.Config} config Configuration object
  */
 function __sanitizeConfigObj_version(config)
@@ -39,8 +39,8 @@ function __sanitizeConfigObj_version(config)
 
 /**
  * Sanitizes config server object
- * @private
  * 
+ * @private
  * @param {module:config-loader.Config} config Configuration object
  */
 function __sanitizeConfigObj_server(config)
@@ -62,16 +62,16 @@ function __sanitizeConfigObj_server(config)
 
 /**
  * Project IDs
- * @private
  * 
+ * @private
  * @type {string[]} 
  */
 let __projects = [];
 
 /**
  * Working copy of project configurations (to prevent overwriting the config file)
- * @private
  * 
+ * @private
  * @type {module:config-loader.Config_Project[]}
  */
 let __projectsCopy = [];
@@ -85,23 +85,23 @@ let __projectsCopy = [];
 
 /**
  * Project relationships
- * @private
  * 
+ * @private
  * @type {module:config-loader.Config_Project_Relations[]}
  */
 let __projects_rel = [];
 
 /**
- * @typedef module:config-loader.Config_Project_Invalid
  * @private
+ * @typedef module:config-loader.Config_Project_Invalid
  * @property {number} [index]
  * @property {string} [id]
  */
 
 /**
  * Invalid projects for deletion
- * @private
  * 
+ * @private
  * @type {module:config-loader.Config_Project_Invalid[]}
  * */
 let __projects_invalid = [];
@@ -119,8 +119,8 @@ let __projects_invalid = [];
 
 /**
  * Sanitizes config projects array
- * @private
  * 
+ * @private
  * @param {module:config-loader.Config} config Configuration object
  */
 function __sanitizeConfigObj_projects(config)
@@ -235,8 +235,8 @@ function __sanitizeConfigObj_removeInvalidProjects()
 
 /**
  * Sanitizes config object
- * @private
  * 
+ * @private
  * @param {string} configStr JSON string of the configuration object
  */
 function __sanitizeConfigObj(configStr)
@@ -279,8 +279,8 @@ function __loadConfig(path)
 
 /**
  * Writes the configuration object to file
- * @private
  * 
+ * @private
  * @param {string} path Path to configuration file
  */
 function __writeConfig(config, path)
@@ -292,8 +292,8 @@ function __writeConfig(config, path)
 
 /**
  * Loads the configuration file into memory and construct the sanitized object
- * @static
  * 
+ * @static
  * @returns {module:config-loader.Config} Sanitized configuration object
  */
 function getConfig()
