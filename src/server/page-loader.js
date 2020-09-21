@@ -95,7 +95,7 @@ function replaceVariables(page, projectTitle, projectSubtitle)
     page = page.replace("${PROJECT.TITLE}", projectTitle);
     page = page.replace("${PROJECT.SUBTITLE}", projectSubtitle);
 
-    page = page.replace("${FOOTER}", `<div class="footer__powered">Powered by <a href="https://github.com/ghifari160/UP-2020083001">UP-2020083001</a></div>`);
+    page = page.replace("${FOOTER}", `<div class="footer__powered">Powered by <a href="https://github.com/ghifari160/UP-2020083001">UP-2020083001</a> v${configLoader.getConfig().version}</div>`);
 
     return page;
 }
