@@ -1,41 +1,63 @@
 const path = require("path");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebPackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-module.exports = {
-    entry: "./src/js/index.js",
-    output: {
-        filename: "app.js",
-        path: path.resolve(__dirname, "dist")
-    },
-    module: {
-        rules: [
-            {
-                test: /.(js|jsx)$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader"
-                }
-            },
-            {
-                test: /.scss$/,
-                use: [
-                    { loader: "style-loader" },
-                    { loader: "css-loader" },
-                    {
-                        loader: "sass-loader",
-                        options: {
-                            implementation: require("node-sass")
-                        }
+module.exports =  (env, options) => {
+    const isDevelopment = (options.mode == "development") ? true : false;
+
+    return {
+        entry: "./src/pages/js/index.js",
+        output: {
+            filename: "app.js",
+            path: path.resolve(__dirname, "dist")
+        },
+        module: {
+            rules: [
+                {
+                    test: /.(js|jsx)$/,
+                    exclude: /node_modules/,
+                    use: {
+                        loader: "babel-loader"
                     }
-                ]
-            }
-        ]
-    },
-    plugins: [
-        new CopyWebpackPlugin({
-            patterns: [
-                { from: "./src", to: "./" }
+                },
+                {
+                    test: /.scss$/,
+                    use: [
+                        isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
+                        {
+                            loader: "css-loader",
+                            options: {
+                                sourceMap: isDevelopment
+                            }
+                        },
+                        {
+                            loader: "sass-loader",
+                            options: {
+                                sourceMap: isDevelopment
+                            }
+                        }
+                    ]
+                }
             ]
-        })
-    ]
+        },
+        plugins: [
+            new CleanWebpackPlugin(),
+            new MiniCssExtractPlugin({
+                filename: "app.css",
+                chunkFilename: "app.css"
+            }),
+            new HtmlWebPackPlugin({
+                template: "./src/pages/error.html",
+                filename: "error.html",
+                inject: "head"
+            }),
+            new HtmlWebPackPlugin({
+                template: "./src/pages/splash.html",
+                filename: "splash.html",
+                inject: "head"
+            })
+        ]
+    };
 };

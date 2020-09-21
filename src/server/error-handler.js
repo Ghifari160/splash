@@ -6,7 +6,8 @@
 
 const COLOR = require("./color"),
       { LOG_LEVEL, log, log_request, log_redirect } = require("./log"),
-      configLoader = require("./config-loader");
+      configLoader = require("./config-loader"),
+      { getPageById, replaceVariables } = require("./page-loader");
 
 /**
  * @typedef module:error-handler.Request
@@ -37,7 +38,7 @@ function errorHandler(err, req, res, next)
 {
     let request = errorReqStack.pop(),
         status = 500,
-        resp;
+        resp, respFile;
 
     if((err && err.code === "ENOENT") || !(err instanceof Error))
         status = 404;
@@ -55,7 +56,18 @@ function errorHandler(err, req, res, next)
     }
 
     res.status(status);
-    res.send(`${status} ${resp}`);
+    
+    respFile = getPageById("ERROR");
+
+    if(respFile)
+    {
+        respFile = replaceVariables(respFile, null, "INVALID");
+        respFile = respFile.replace("${ERROR.MESSAGE}", resp);
+
+        res.send(respFile);
+    }
+    else
+        res.send(`${status} ${resp}`);
 
     log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, request.project_id, status, request.exec_start);
 }

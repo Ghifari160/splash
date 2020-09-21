@@ -258,13 +258,23 @@ function __sanitizeConfigObj(configStr)
 
 /**
  * Loads the configuration file to memory
- * @private
  * 
+ * @private
  * @param {string} path Path to configuration file
  */
 function __loadConfig(path)
 {
-    return fs.readFileSync(path, { encoding: "utf8" });
+    let configStr;
+    try
+    {
+        configStr = fs.readFileSync(path, { encoding: "utf8" });
+    }
+    catch(err)
+    {
+        configStr = "{}";
+    }
+
+    return configStr;
 }
 
 /**

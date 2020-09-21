@@ -6,36 +6,46 @@ const express = require("express");
 const COLOR = require("./color"),
       { LOG_LEVEL, log, log_request, log_redirect } = require("./log"),
       configLoader = require("./config-loader"),
-      { errorReqStack: errReqStack, errorHandler } = require("./error-handler");
+      { errorReqStack: errReqStack, errorHandler } = require("./error-handler"),
+      { loadPage, getPageById, getPageByPath, replaceVariables } = require("./page-loader");
 
 let config = configLoader.getConfig();
 
 const app = express();
 
-let rootProjectIndex;
-
 for(let i = 0; i < config.projects.length; i++)
 {
-    if(config.__projects[i] == "root")
-        rootProjectIndex = i;
-
     if(config.projects[i].hasOwnProperty("page"))
     {
         if(!fs.existsSync(path.resolve(process.cwd(), config.projects[i].page)))
         {
-            if(config.__projects[i] == "root")
-                log(LOG_LEVEL.WARN, `Invalid page for root: ${config.projects[i].page}. Setting to default`);
-            else
-                log(LOG_LEVEL.WARN, `Invalid page for project ${config.projects[i].id}: ${config.projects[i].page}. Setting to root`);
+            log(LOG_LEVEL.WARN, `Invalid page for project ${config.projects[i].id}: ${config.projects[i].page}. Setting to root`);
 
             config.projects[i].page = "";
             delete config.projects[i].page;
         }
+        else
+            loadPage(path.resolve(process.cwd(), config.projects[i].page), config.projects[i].id);
     }
 }
 
-if(!config.projects[rootProjectIndex].hasOwnProperty("page"))
-    config.projects[rootProjectIndex].page = path.resolve(__dirname, "../public/index.html");
+// Load and cache default pages
+loadPage(path.resolve(process.cwd(), "default/error.html"), "ERROR");
+loadPage(path.resolve(process.cwd(), "default/splash.html"), "SPLASH");
+
+// Verify error page
+if(config.server.hasOwnProperty("error_page"))
+{
+    if(!fs.existsSync(path.resolve(process.cwd(), config.server.error_page)))
+    {
+        config.server.error_page = path.resolve(process.cwd(), "default/error.html");
+        log(LOG_LEVEL.WARN, `Invalid error page configuration. Setting to default`);
+    }
+    else
+        loadPage(path.resolve(process.cwd(), config.server.error_page), "ERROR");
+}
+else
+    config.server.error_page = path.resolve(process.cwd(), "default/error.html");
 
 app.listen(config.server.port, () =>
 {
@@ -86,7 +96,7 @@ app.get("/", (req, res) =>
     let exec_start = new Date(),
         project_id;
 
-    let projectIndex = 0;
+    let projectIndex = -1;
 
     for(let i = 0; i < config.projects.length; i++)
     {
@@ -94,17 +104,32 @@ app.get("/", (req, res) =>
             projectIndex = i;
     }
 
-    project_id = config.__projects[projectIndex];
+    if(projectIndex < 0)
+        project_id = req.hostname;
+    else
+        project_id = config.__projects[projectIndex];
 
     errReqStack.push({ exec_start: exec_start, project_id: project_id });
 
-    if(config.projects[projectIndex].hasOwnProperty("page"))
+    if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("page"))
     {
-        res.sendFile(path.resolve(process.cwd(), config.projects[projectIndex].page));
+        let page = getPageById(config.projects[projectIndex].id);
+
+        if(!page)
+        {
+            res.send("Under Construction");
+            res.send(config.projects[projectIndex].id);
+        }
+        else
+        {
+            page = replaceVariables(page, "Under Construction", config.projects[projectIndex].id);
+
+            res.send(page);
+        }
 
         log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, config.projects[projectIndex].id, 200, exec_start);
     }
-    else if(config.projects[projectIndex].hasOwnProperty("redirect"))
+    else if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("redirect"))
     {
         let red = config.projects[projectIndex].redirect;
 
@@ -125,9 +150,21 @@ app.get("/", (req, res) =>
     }
     else
     {
-        res.sendFile(path.resolve(process.cwd(), config.projects[rootProjectIndex].page));
+        let page = getPageById("SPLASH");
 
-        log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, config.projects[projectIndex].id, 200, exec_start);
+        if(!page)
+        {
+            res.send("Under Construction");
+            res.send(config.projects[projectIndex].id);
+        }
+        else
+        {
+            page = replaceVariables(page, "Under Construction", (projectIndex > -1) ? config.projects[projectIndex].id : req.hostname);
+
+            res.send(page);
+        }
+
+        log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, (projectIndex > -1) ? config.projects[projectIndex].id : req.hostname, 200, exec_start);
     }
 });
 
