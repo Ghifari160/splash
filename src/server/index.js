@@ -1,3 +1,7 @@
+/**
+ * Express Server
+ */
+
 const fs = require("fs"),
       path = require("path");
 
@@ -13,6 +17,7 @@ let config = configLoader.getConfig();
 
 const app = express();
 
+// Scan projects configuration and load and cache custom pages
 for(let i = 0; i < config.projects.length; i++)
 {
     if(config.projects[i].hasOwnProperty("page"))
@@ -52,6 +57,8 @@ app.listen(config.server.port, () =>
     log(LOG_LEVEL.INFO, `Server listening on ${config.server.port}`);
 });
 
+// Handler: Static assets
+// Static assets are served from ./static through //HOSTNAME:PORT/static/
 app.get("/static/*", (req, res, next) =>
 {
     let exec_start = new Date();
@@ -68,29 +75,11 @@ app.get("/static/*", (req, res, next) =>
 
             log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, "STATIC", 200, exec_start);
         }
-        // if(err && err.code === "ENOENT")
-        // {
-        //     res.status(404);
-        //     res.send("404 Not Found.");
-
-        //     log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, "STATIC", 404, exec_start);
-        // }
-        // else if(err)
-        // {
-        //     res.status(500)
-        //     res.send("500 Internal Error.");
-
-        //     log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, "STATIC", 500, exec_start);
-        // }
-        // else
-        // {
-        //     res.sendFile(path.resolve(process.cwd(), req.path.substring(1)));
-
-        //     log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, "STATIC", 200, exec_start);
-        // }
     });
 });
 
+// Handler: Projects
+// Projects are configured through data/config.json
 app.get("/", (req, res) =>
 {
     let exec_start = new Date(),
@@ -98,12 +87,14 @@ app.get("/", (req, res) =>
 
     let projectIndex = -1;
 
+    // Linearly for project configuration by domain
     for(let i = 0; i < config.projects.length; i++)
     {
         if(config.projects[i].domain == req.hostname)
             projectIndex = i;
     }
 
+    // Assume project ID to be the request hostname if no configuration is found
     if(projectIndex < 0)
         project_id = req.hostname;
     else
@@ -111,6 +102,7 @@ app.get("/", (req, res) =>
 
     errReqStack.push({ exec_start: exec_start, project_id: project_id });
 
+    // Serve project's custom page
     if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("page"))
     {
         let page = getPageById(config.projects[projectIndex].id);
@@ -129,6 +121,7 @@ app.get("/", (req, res) =>
 
         log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, config.projects[projectIndex].id, 200, exec_start);
     }
+    // Redirect to parent project
     else if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("redirect"))
     {
         let red = config.projects[projectIndex].redirect;
@@ -148,6 +141,7 @@ app.get("/", (req, res) =>
             log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, 302, config.projects[projectIndex].id, exec_start);
         }
     }
+    // Serve default splash page
     else
     {
         let page = getPageById("SPLASH");
@@ -168,6 +162,8 @@ app.get("/", (req, res) =>
     }
 });
 
+// Handler: Default
+// Unknown requests method and path will return 404
 app.all("*", (req, res, next) =>
 {
     let exec_start = new Date();
@@ -175,11 +171,8 @@ app.all("*", (req, res, next) =>
     errReqStack.push({ exec_start: exec_start, project_id: "INVALID" });
 
     next({});
-
-    // res.status(404);
-    // res.sendFile(path.resolve(__dirname, "../public/404.html"));
-
-    // log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, "INVALID", 404, exec_start);
 });
 
+// Handler: Error
+// Register custom Express error handler from error-handler module
 app.use(errorHandler);
