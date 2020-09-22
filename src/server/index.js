@@ -52,9 +52,9 @@ if(config.server.hasOwnProperty("error_page"))
 else
     config.server.error_page = path.resolve(process.cwd(), "default/error.html");
 
-app.listen(config.server.port, () =>
+app.listen(config.server.listen_port, () =>
 {
-    log(LOG_LEVEL.INFO, `Server listening on ${config.server.port}`);
+    log(LOG_LEVEL.INFO, `Server listening on ${config.server.listen_port}`);
 });
 
 // Handler: Static assets
@@ -130,7 +130,7 @@ app.get("/", (req, res) =>
         {
             red = config.projects[config.__projects.indexOf(red.substring(1))].domain;
 
-            res.redirect(302, `//${red}:${config.server.port}/`);
+            res.redirect(302, `//${red}:${config.server.public_port}/`);
 
             log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, config.projects[projectIndex].id, 302, exec_start);
         }

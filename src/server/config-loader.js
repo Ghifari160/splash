@@ -34,7 +34,9 @@ function __sanitizeConfigObj_version(config)
  * Server configuration
  * 
  * @typedef module:config-loader.Config_Server
- * @property {string} port Listening port (i.e. `8080`)
+ * @property {string} port **Deprecated. Use `server.listen_port` instead!** Listening port (i.e. `8080`)
+ * @property {string} listen_port Listening port (i.e. `8080`)
+ * @property {string} public_port Public port for reverse proxy (i.e. `80`)
  */
 
 /**
@@ -52,11 +54,45 @@ function __sanitizeConfigObj_server(config)
         log(LOG_LEVEL.WARN, `Missing server configuration. Generating default server configuration`);
     }
 
-    if(!config.server.hasOwnProperty("port"))
-    {
-        config.server.port = "8080";
+    if(config.server.hasOwnProperty("port"))
+        log(LOG_LEVEL.WARN, `server.port is deprecated and will not be supported in future versions`);
 
-        log(LOG_LEVEL.WARN, `Missing server port. Setting default server port`);
+    if(!config.server.hasOwnProperty("listen_port"))
+    {
+        if(config.server.hasOwnProperty("port"))
+        {
+            config.server.listen_port = config.server.port;
+
+            log(LOG_LEVEL.WARN, `Missing server.listen_port. Setting server.listen_port to server.port`);
+        }
+        else
+        {
+            config.server.listen_port = "8080";
+
+            log(LOG_LEVEL.WARN, `Missing server.listen_port. Setting to default server listen port`);
+        }
+    }
+
+    if(!config.server.hasOwnProperty("public_port"))
+    {
+        if(config.server.hasOwnProperty("port"))
+        {
+            config.server.public_port = config.server.port;
+
+            log(LOG_LEVEL.WARN, `Missing server.public_port. Setting server.public_port to server.port`);
+        }
+        else if(config.server.hasOwnProperty("listen_port"))
+        {
+            config.server.public_port = config.server.listen_port;
+
+            log(LOG_LEVEL.WARN, `Missing server.public_port. Setting server.public_port to server.listen_port`);
+        }
+        else
+        {
+            config.server.public_port = "8080";
+
+            log(LOG_LEVEL.WARN, `Missing server.public_port. Setting to default server public port`);
+        }
     }
 }
 
