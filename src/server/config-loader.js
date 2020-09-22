@@ -12,7 +12,7 @@ const COLOR = require("./color"),
       { LOG_LEVEL, log, log_request } = require("./log");
 
 const config_location = "data/config.json",
-      version_matchingString = "<0.1.x";
+      version_current = "0.1.0";
 
 /**
  * Sanitizes config version object
@@ -22,9 +22,9 @@ const config_location = "data/config.json",
  */
 function __sanitizeConfigObj_version(config)
 {
-    if(!config.hasOwnProperty("version") || semver.satisfies(config.version, version_matchingString))
+    if(!config.hasOwnProperty("version") || semver.lt(config.version, version_current))
     {
-        config.version = "0.1.0";
+        config.version = version_current;
 
         log(LOG_LEVEL.WARN, `Version is outdated or missing. Upgrading config file`);
     }
