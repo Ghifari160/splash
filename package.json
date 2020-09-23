@@ -3,7 +3,11 @@
   "version": "0.2.0",
   "description": "Default landing pages",
   "author": "GHIFARI160",
-  "license": "NO LICENSE",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ghifari160/splash"
+  },
   "scripts": {
     "start": "node src/server",
     "pages:dev": "webpack-dev-server --mode development",
