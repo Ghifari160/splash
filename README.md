@@ -1,4 +1,4 @@
-# UP-2020083001
+# Splash
 
 Default landing pages.
 
@@ -13,8 +13,8 @@ Ensure that Git is installed.
 Clone the repository and enter the directory.
 
 ``` shell
-git clone https://github.com/ghifari160/UP-2020083001
-cd UP-2020083001
+git clone https://github.com/ghifari160/splash
+cd splash
 ```
 
 Install _all_ dependencies for this project.
