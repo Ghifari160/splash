@@ -151,6 +151,8 @@ let __projects_invalid = [];
  * @property {string} [domain] Project domain (i.e. `localhost`)
  * @property {string} [redirect] Redirect target (i.e. `project.local`)
  * @property {string} [page] Page to be served (i.e. `project.html`)
+ * @property {string} [title] Splash page title (i.e. `Under Construction`)
+ * @property {string} [subtitle] Splash page subtitle (i.e. `Secret Project`)
  */
 
 /**
@@ -178,9 +180,6 @@ function __sanitizeConfigObj_projects(config)
             log(LOG_LEVEL.WARN, `Missing project id for project(${i})! Skipping project`);
         }
 
-        if(!invalid && !project.hasOwnProperty("cn"))
-            project.cn = project.id;
-        
         if(!invalid && project.hasOwnProperty("redirect"))
         {
             if(project.redirect.substring(0, 1) == "@")

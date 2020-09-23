@@ -102,63 +102,81 @@ app.get("/", (req, res) =>
 
     errReqStack.push({ exec_start: exec_start, project_id: project_id });
 
-    // Serve project's custom page
-    if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("page"))
-    {
-        let page = getPageById(config.projects[projectIndex].id);
+    let page, title, subtitle;
 
-        if(!page)
+    // Assign splash properties from project config
+    if(projectIndex > -1)
+    {
+        // Retrieve custom or default splash page from cache
+        if(!config.projects[projectIndex].hasOwnProperty("page"))
+            page = getPageById("SPLASH");
+        else
+            page = getPageById(config.projects[projectIndex].id);
+
+        // Assign splash title
+        if(!config.projects[projectIndex].hasOwnProperty("title"))
+            title = "Under Construction";
+        else
+            title = config.projects[projectIndex].title;
+
+        // Assign splash subtitle
+        if(!config.projects[projectIndex].hasOwnProperty("subtitle"))
         {
-            res.send("Under Construction");
-            res.send(config.projects[projectIndex].id);
+            if(!config.projects[projectIndex].hasOwnProperty("cn"))
+                subtitle = project_id;
+            else
+                subtitle = config.projects[projectIndex].cn;
         }
         else
-        {
-            page = replaceVariables(page, "Under Construction", config.projects[projectIndex].id);
-
-            res.send(page);
-        }
-
-        log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, config.projects[projectIndex].id, 200, exec_start);
+            subtitle = config.projects[projectIndex].subtitle;
     }
-    // Redirect to parent project
-    else if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("redirect"))
+    // Assume splash properties for unconfigured projects
+    else
+    {
+        page = getPageById("SPLASH");
+
+        title = "Under Construction";
+        subtitle = project_id;
+    }
+
+    // Redirect to target
+    if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("redirect"))
     {
         let red = config.projects[projectIndex].redirect;
 
+        // Redirect to parent project
         if(red.substring(0, 1) == "@")
         {
             red = config.projects[config.__projects.indexOf(red.substring(1))].domain;
 
             res.redirect(302, `//${red}:${config.server.public_port}/`);
 
-            log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, config.projects[projectIndex].id, 302, exec_start);
+            log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, project_id, 302, exec_start);
         }
+        // Redirect to any target
         else
         {
             res.redirect(302, red);
 
-            log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, 302, config.projects[projectIndex].id, exec_start);
+            log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, 302, project_id, exec_start);
         }
     }
-    // Serve default splash page
+    // Serve splash page
     else
     {
-        let page = getPageById("SPLASH");
-
         if(!page)
         {
-            res.send("Under Construction");
-            res.send(config.projects[projectIndex].id);
+            res.send(title);
+            res.send(subtitle);
         }
         else
         {
-            page = replaceVariables(page, "Under Construction", (projectIndex > -1) ? config.projects[projectIndex].id : req.hostname);
+            page = replaceVariables(page, title, subtitle);
 
             res.send(page);
         }
 
-        log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, (projectIndex > -1) ? config.projects[projectIndex].id : req.hostname, 200, exec_start);
+        log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, project_id, 200, exec_start);
     }
 });
 
