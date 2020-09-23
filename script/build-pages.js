@@ -43,7 +43,11 @@ let htmlQ = [];
 let cssCache = [];
 
 log(LOG_LEVEL.INFO, `Preparing directories`);
-fs.mkdirSync(path.resolve(process.cwd(), buildLocation));
+try
+{
+    fs.mkdirSync(path.resolve(process.cwd(), buildLocation));
+}
+catch(err){}
 
 log(LOG_LEVEL.INFO, `Scanning Webpack configuration`);
 
