@@ -234,7 +234,6 @@ function __sanitizeConfigObj_removeInvalidProjects()
         {
             __projects.splice(__projects_invalid[i].index - opcount, 1);
             __projectsCopy.splice(__projects_invalid[i].index - opcount, 1);
-            // config.projects.splice(__projects_invalid[i].index - opcount, 1);
             opcount++;
         }
         else if(__projects_invalid[i].hasOwnProperty("id"))
@@ -245,14 +244,6 @@ function __sanitizeConfigObj_removeInvalidProjects()
                 __projects.splice(p, 1);
                 __projectsCopy.splice(p, 1);
             }
-
-            // for(let j = 0; j < config.projects.length; j++)
-            // {
-            //     if(config.projects[i].id = __projects_invalid[i].id)
-            //         p = j;
-            // }
-
-            // config.projects.splice(p, 1);
 
             opcount++;
         }
