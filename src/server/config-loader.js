@@ -12,7 +12,7 @@ const COLOR = require("./color"),
       { LOG_LEVEL, log, log_request } = require("./log");
 
 const config_location = "data/config.json",
-      version_current = "0.3.0";
+      version_current = "0.3.1";
 
 /**
  * Sanitizes config version object
