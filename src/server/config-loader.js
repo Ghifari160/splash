@@ -151,8 +151,9 @@ let __projects_invalid = [];
  * @property {string} [domain] Project domain (i.e. `localhost`)
  * @property {string} [redirect] Redirect target (i.e. `project.local`)
  * @property {string} [page] Page to be served (i.e. `project.html`)
- * @property {string} [title] Splash page title (i.e. `Under Construction`)
- * @property {string} [subtitle] Splash page subtitle (i.e. `Secret Project`)
+ * @property {string} [page_title] Splash page title (i.e. `Splash`)
+ * @property {string} [title] Splash project title (i.e. `Under Construction`)
+ * @property {string} [subtitle] Splash project subtitle (i.e. `Secret Project`)
  */
 
 /**

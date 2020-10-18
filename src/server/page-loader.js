@@ -84,18 +84,32 @@ function getPageByPath(path)
 /**
  * Replace variables
  * 
+ * __Note for v0.4.0+:__ This function now supports `pageTitle` parameter. To prevent breaking changes,
+ * `projectSubtitle` is now an optional parameter. If `projectSubtitle` is unset, it is
+ * assumed that `projectTitle` is the project subtitle, `pageTitle` is the project title, and
+ * the page title is unconfigured (and will therefore be set equal to the project title).
+ * 
  * @static
  * @param {string} page Page contents. Use {@link module:page-loader.getPageByPath} or {@link module:page-loader.getPageById}
- * @param {string} projectTitle Project title
- * @param {string} projectSubtitle Project subtitle. Generally it is the project ID
+ * @param {string} pageTitle Page title (project title if `projectSubtitle` is not set)
+ * @param {string} projectTitle Project title (project subtitle if `projectSubtitle` is not set)
+ * @param {string} [projectSubtitle] Project subtitle. Generally it is the project ID
  * @returns {string} Page contents with variables replaced
  */
-function replaceVariables(page, projectTitle, projectSubtitle)
+function replaceVariables(page, pageTitle, projectTitle, projectSubtitle = null)
 {
-    page = page.replace("${PROJECT.TITLE}", projectTitle);
-    page = page.replace("${PROJECT.SUBTITLE}", projectSubtitle);
+    if(projectSubtitle == null)
+    {
+        projectSubtitle = projectTitle;
+        projectTitle = pageTitle;
+    }
 
-    page = page.replace("${FOOTER}", `<div class="footer__powered">Powered by <a href="https://github.com/ghifari160/splash">Splash</a> v${configLoader.getConfig().version}</div>`);
+    page = page.replace(/\$\{PROJECT\.PAGE\_TITLE\}/gi, pageTitle);
+
+    page = page.replace(/\$\{PROJECT\.TITLE\}/gi, projectTitle);
+    page = page.replace(/\$\{PROJECT\.SUBTITLE\}/gi, projectSubtitle);
+
+    page = page.replace(/\$\{FOOTER\}/gi, `<div class="footer__powered">Powered by <a href="https://github.com/ghifari160/splash">Splash</a> v${configLoader.getConfig().version}</div>`);
 
     return page;
 }

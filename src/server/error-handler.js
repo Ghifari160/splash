@@ -62,7 +62,7 @@ function errorHandler(err, req, res, next)
     if(respFile)
     {
         respFile = replaceVariables(respFile, null, "INVALID");
-        respFile = respFile.replace("${ERROR.MESSAGE}", resp);
+        respFile = respFile.replace(/\$\{ERROR\.MESSAGE\}/gi, resp);
 
         res.send(respFile);
     }

@@ -1,7 +1,3 @@
-/**
- * Express Server
- */
-
 const fs = require("fs"),
       path = require("path");
 
@@ -102,7 +98,7 @@ app.get("/", (req, res) =>
 
     errReqStack.push({ exec_start: exec_start, project_id: project_id });
 
-    let page, title, subtitle;
+    let page, page_title, title, subtitle;
 
     // Assign splash properties from project config
     if(projectIndex > -1)
@@ -118,6 +114,12 @@ app.get("/", (req, res) =>
             title = "Under Construction";
         else
             title = config.projects[projectIndex].title;
+
+        // Assign splash page title
+        if(!config.projects[projectIndex].hasOwnProperty("page_title"))
+            page_title = title;
+        else
+            page_title = config.projects[projectIndex].page_title;
 
         // Assign splash subtitle
         if(!config.projects[projectIndex].hasOwnProperty("subtitle"))
@@ -136,6 +138,7 @@ app.get("/", (req, res) =>
         page = getPageById("SPLASH");
 
         title = "Under Construction";
+        page_title = title;
         subtitle = project_id;
     }
 
@@ -171,7 +174,7 @@ app.get("/", (req, res) =>
         }
         else
         {
-            page = replaceVariables(page, title, subtitle);
+            page = replaceVariables(page, page_title, title, subtitle);
 
             res.send(page);
         }
