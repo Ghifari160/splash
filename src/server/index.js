@@ -1,5 +1,6 @@
 const fs = require("fs"),
-      path = require("path");
+      path = require("path"),
+      readline = require("readline");
 
 const express = require("express");
 
@@ -9,48 +10,227 @@ const COLOR = require("./color"),
       { errorReqStack: errReqStack, errorHandler } = require("./error-handler"),
       { loadPage, getPageById, getPageByPath, replaceVariables } = require("./page-loader");
 
-let config = configLoader.getConfig();
+/**
+ * Timeout for graceful shutdown attempt
+ * 
+ * @private
+ * @type {number}
+ */
+const shutdownTimeout = 120000;
+
+let config,
+    server,
+    connections = [];
 
 const app = express();
 
-// Scan projects configuration and load and cache custom pages
-for(let i = 0; i < config.projects.length; i++)
+/**
+ * Shutdown the process
+ * 
+ * By default, it will attempt to gracefully shutdown the server by closing all remaining
+ * connections before shutting down the process. If the forceful shutdown flag is set, no attempt
+ * will be made to close the remaining connections.
+ * 
+ * @private
+ * @param {boolean} [force] Forceful shutdown flag
+ */
+function shutdown(force = false)
 {
-    if(config.projects[i].hasOwnProperty("page"))
+    if(force)
+        process.exit();
+        
+    // Gracefully close remaining connections
+    server.close(() =>
     {
-        if(!fs.existsSync(path.resolve(process.cwd(), config.projects[i].page)))
-        {
-            log(LOG_LEVEL.WARN, `Invalid page for project ${config.projects[i].id}: ${config.projects[i].page}. Setting to root`);
+        process.exit();
+    });
 
-            config.projects[i].page = "";
-            delete config.projects[i].page;
+    setTimeout(() =>
+    {
+        log(LOG_LEVEL.SEVERE, "Could not close connections in time! Forcefully shutting down.");
+
+        process.exit(1);
+    }, shutdownTimeout);
+}
+
+/**
+ * SIG{QUIT} handler helper function
+ * 
+ * @private
+ * @param {string} signal Signal type (i.e. `SIGINT` or `SIGTERM`)
+ * @param {boolean} [force] Forceful shutdown flag
+ */
+function __sigquit(signal, force = false)
+{
+    log(LOG_LEVEL.INFO, `${signal.toUpperCase()} caught! Exiting...`);
+
+    shutdown(force);
+}
+
+/**
+ * SIGHUP handler helper function
+ * 
+ * @private
+ */
+function __sighup()
+{
+    log(LOG_LEVEL.INFO, "SIGHUP caught! Reloading configuration and cache...");
+
+    __init();
+}
+
+/**
+ * Initialization logger helper function
+ * 
+ * @private
+ * @param {module:log.LOG_LEVEL} level Log level
+ * @param {string} message Message to log
+ */
+function __log_init(level, message)
+{
+    if(process.env.NODE_ENV === undefined || process.env.NODE_ENV === "development")
+        log(level, `[INIT] ${message}`);
+}
+
+/**
+ * Loads the server configuration
+ * 
+ * @private
+ */
+function __init_loadConfig()
+{
+    __log_init(LOG_LEVEL.INFO, "Loading configuration");
+
+    config = configLoader.getConfig();
+}
+
+/**
+ * Scans projects configuration and caches custom pages
+ * 
+ * @private
+ */
+function __init_scanProjects()
+{
+    __log_init(LOG_LEVEL.INFO, "Scanning projects configuration and cache custom pages");
+
+    // Scan projects configuration and load and cache custom pages
+    for(let i = 0; i < config.projects.length; i++)
+    {
+        if(config.projects[i].hasOwnProperty("page"))
+        {
+            if(!fs.existsSync(path.resolve(process.cwd(), config.projects[i].page)))
+            {
+                log(LOG_LEVEL.WARN, `Invalid page for project ${config.projects[i].id}: ${config.projects[i].page}. Setting to root`);
+
+                config.projects[i].page = "";
+                delete config.projects[i].page;
+            }
+            else
+                loadPage(path.resolve(process.cwd(), config.projects[i].page), config.projects[i].id);
+        }
+    }
+}
+
+/**
+ * Cache default pages
+ * 
+ * @private
+ */
+function __init_cacheDefaultPages()
+{
+    __log_init(LOG_LEVEL.INFO, "Caching default pages to memory");
+    
+    // Load and cache default pages
+    loadPage(path.resolve(process.cwd(), "default/error.html"), "ERROR");
+    loadPage(path.resolve(process.cwd(), "default/splash.html"), "SPLASH");
+}
+
+/**
+ * Verify error page configuration and cache custom error page
+ * 
+ * @private
+ */
+function __init_verifyErrorPage()
+{
+    __log_init(LOG_LEVEL.INFO, "Verifying error page configuration");
+    
+    // Verify error page configuration
+    if(config.server.hasOwnProperty("error_page"))
+    {
+        if(!fs.existsSync(path.resolve(process.cwd(), config.server.error_page)))
+        {
+            config.server.error_page = path.resolve(process.cwd(), "default/error.html");
+            log(LOG_LEVEL.WARN, `Invalid error page configuration. Setting to default`);
         }
         else
-            loadPage(path.resolve(process.cwd(), config.projects[i].page), config.projects[i].id);
-    }
-}
-
-// Load and cache default pages
-loadPage(path.resolve(process.cwd(), "default/error.html"), "ERROR");
-loadPage(path.resolve(process.cwd(), "default/splash.html"), "SPLASH");
-
-// Verify error page
-if(config.server.hasOwnProperty("error_page"))
-{
-    if(!fs.existsSync(path.resolve(process.cwd(), config.server.error_page)))
-    {
-        config.server.error_page = path.resolve(process.cwd(), "default/error.html");
-        log(LOG_LEVEL.WARN, `Invalid error page configuration. Setting to default`);
+           loadPage(path.resolve(process.cwd(), config.server.error_page), "ERROR");
     }
     else
-        loadPage(path.resolve(process.cwd(), config.server.error_page), "ERROR");
+        config.server.error_page = path.resolve(process.cwd(), "default/error.html");
 }
-else
-    config.server.error_page = path.resolve(process.cwd(), "default/error.html");
 
-app.listen(config.server.listen_port, () =>
+/**
+ * Initialize the server
+ * 
+ * @private
+ */
+function __init()
+{
+    __init_loadConfig();
+    __init_cacheDefaultPages();
+    __init_verifyErrorPage();
+    __init_scanProjects();
+}
+
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
+
+process.on("SIGINT", () =>
+{
+    __sigquit("sigint");
+});
+
+process.on("SIGTERM", () =>
+{
+    __sigquit("sigterm");
+});
+
+process.on("SIGSTP", () =>
+{
+    __sigquit("sigstp");
+});
+
+process.on("SIGHUP", () =>
+{
+    __sighup();
+});
+
+process.stdin.on("keypress", (str, key) =>
+{
+    if(key.ctrl && key.name === "c")
+        __sigquit("sigint");
+    else if(key.ctrl && key.name === "t")
+        __sigquit("sigterm", true);
+    else if(key.ctrl && key.name === "z")
+        __sigquit("sigstp", true);
+    else if(key.ctrl && key.name === "r")
+        __sighup();
+});
+
+__init();
+
+server = app.listen(config.server.listen_port, () =>
 {
     log(LOG_LEVEL.INFO, `Server listening on ${config.server.listen_port}`);
+});
+
+server.on("connection", (connection) =>
+{
+    connections.push(connection);
+    connection.on("close", () =>
+    {
+        connections = connections.filter(curr => curr !== connection);
+    });
 });
 
 // Handler: Static assets
