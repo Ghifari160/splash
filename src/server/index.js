@@ -19,7 +19,9 @@ const COLOR = require("./color"),
 const shutdownTimeout = 120000;
 
 let config,
+    config_old,
     server,
+    server_init = false,
     connections = [];
 
 const app = express();
@@ -96,12 +98,13 @@ function __log_init(level, message)
  * Loads the server configuration
  * 
  * @private
+ * @param {boolean} [sanitizeVersion] Sanitize the version configuration object. If unset, the object will be sanitized
  */
-function __init_loadConfig()
+function __init_loadConfig(sanitizeVersion = true)
 {
     __log_init(LOG_LEVEL.INFO, "Loading configuration");
 
-    config = configLoader.getConfig();
+    config = configLoader.getConfig(sanitizeVersion);
 }
 
 /**
@@ -170,16 +173,50 @@ function __init_verifyErrorPage()
 }
 
 /**
+ * Check for Non-Hotreloadable (NHR) _configuration_ changes
+ * 
+ * @private
+ */
+function __init_checkForNHRChanges()
+{
+    let changes = [];
+    
+    if(config_old.version != config.version)
+        changes.push("version");
+
+    if(config_old.server.listen_port != config.server.listen_port)
+        changes.push("server.listen_port");
+    
+    if(config_old.server.public_port != config.server.public_port)
+        changes.push("server.public_port");
+    
+    if(changes.length > 0)
+    {
+        log(LOG_LEVEL.WARN, `Non-hotreloadable configuration changes detected! These changes will not apply until a server restart!`);
+        log(LOG_LEVEL.WARN, `Changed keys: ${changes.join(" ")}`);
+    }
+}
+
+/**
  * Initialize the server
  * 
  * @private
  */
 function __init()
 {
-    __init_loadConfig();
+    if(server_init)
+        config_old = config;
+
+    __init_loadConfig(!server_init);
+
+    if(server_init)
+        __init_checkForNHRChanges();
+
     __init_cacheDefaultPages();
     __init_verifyErrorPage();
     __init_scanProjects();
+
+    server_init = true;
 }
 
 readline.emitKeypressEvents(process.stdin);

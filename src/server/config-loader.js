@@ -265,12 +265,14 @@ function __sanitizeConfigObj_removeInvalidProjects()
  * 
  * @private
  * @param {string} configStr JSON string of the configuration object
+ * @param {boolean} [sanitizeVersion] Sanitize the version configuration object. If unset, the object will be sanitized
  */
-function __sanitizeConfigObj(configStr)
+function __sanitizeConfigObj(configStr, sanitizeVersion = true)
 {
     let config = JSON.parse(configStr);
 
-    __sanitizeConfigObj_version(config);
+    if(sanitizeVersion)
+        __sanitizeConfigObj_version(config);
 
     __sanitizeConfigObj_server(config);
 
@@ -321,11 +323,12 @@ function __writeConfig(config, path)
  * Loads the configuration file into memory and construct the sanitized object
  * 
  * @static
+ * @param {boolean} [sanitizeVersion] Sanitize the version configuration object. If unset, the object will be sanitized
  * @returns {module:config-loader.Config} Sanitized configuration object
  */
-function getConfig()
+function getConfig(sanitizeVersion = true)
 {
-    let config = __sanitizeConfigObj(__loadConfig(config_location));
+    let config = __sanitizeConfigObj(__loadConfig(config_location), sanitizeVersion);
 
     __writeConfig(config, config_location);
 
