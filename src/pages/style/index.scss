@@ -1,5 +1,6 @@
 @import "mixins";
 @import "lightmode";
+@import "darkmode";
 
 body,
 body.lightmode
@@ -15,6 +16,18 @@ body.lightmode
     --footer-a-active-color: #{$default-light-color-3};
 }
 
+body.darkmode
+{
+    --page-background-color: #{$default-dark-color-1};
+    
+    --header-color: #{$default-dark-color-2};
+
+    --footer-color: #{$default-dark-color-2};
+
+    --footer-a-color: #{$default-dark-color-2};
+    --footer-a-hover-color: #{$default-dark-color-2};
+    --footer-a-active-color: #{$default-dark-color-3};
+}
 
 html, body
 {
