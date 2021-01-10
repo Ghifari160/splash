@@ -1,4 +1,20 @@
 @import "mixins";
+@import "lightmode";
+
+body,
+body.lightmode
+{
+    --page-background-color: #{$default-light-color-1};
+    
+    --header-color: #{$default-light-color-2};
+
+    --footer-color: #{$default-light-color-2};
+
+    --footer-a-color: #{$default-light-color-2};
+    --footer-a-hover-color: #{$default-light-color-2};
+    --footer-a-active-color: #{$default-light-color-3};
+}
+
 
 html, body
 {
@@ -8,7 +24,7 @@ html, body
     width: 100%;
     height: 100%;
 
-    background-color: #eee;
+    background-color: var(--page-background-color);
 }
 
 .header
@@ -22,7 +38,7 @@ html, body
 
     transform: translateY(-50%);
 
-    color: #111;
+    color: var(--header-color);
 
     &__title
     {
@@ -48,7 +64,7 @@ html, body
     
     padding: 8px 2.5%;
 
-    color: #111111;
+    color: var(--footer-color);
 
     div
     {
@@ -60,7 +76,7 @@ html, body
 
         a
         {
-            @include a(#111111, underline, #111111, none, #000000, none);
+            @include a(var(--footer-a-color), underline, var(--footer-a-hover-color), none, var(--footer-a-active-color), none);
         }
     }
 
