@@ -74,9 +74,9 @@ function __sigquit(signal, force = false)
  * 
  * @private
  */
-function __sighup()
+function __sigusr2()
 {
-    log(LOG_LEVEL.INFO, "SIGHUP caught! Reloading configuration and cache...");
+    log(LOG_LEVEL.INFO, "SIGUSR2 caught! Reloading configuration and cache...");
 
     __init();
 }
@@ -233,14 +233,9 @@ process.on("SIGTERM", () =>
     __sigquit("sigterm");
 });
 
-process.on("SIGSTP", () =>
+process.on("SIGUSR2", () =>
 {
-    __sigquit("sigstp");
-});
-
-process.on("SIGHUP", () =>
-{
-    __sighup();
+    __sigusr2();
 });
 
 process.stdin.on("keypress", (str, key) =>
@@ -249,10 +244,8 @@ process.stdin.on("keypress", (str, key) =>
         __sigquit("sigint");
     else if(key.ctrl && key.name === "t")
         __sigquit("sigterm", true);
-    else if(key.ctrl && key.name === "z")
-        __sigquit("sigstp", true);
     else if(key.ctrl && key.name === "r")
-        __sighup();
+        __sigusr2();
 });
 
 __init();
