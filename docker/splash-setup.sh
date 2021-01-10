@@ -3,7 +3,7 @@
 splash_setup() {
     chown node:node /var/www/splash
     chmod 755 /var/www/splash
-    curl -sL https://github.com/Ghifari160/splash/releases/download/v0.3.1/splash-v0.3.1.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
+    curl -sL https://projects.gassets.space/splash/v0.3.1/splash-v0.3.1.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
     cd /var/www/splash
     mkdir data
     npm i --only=prod
