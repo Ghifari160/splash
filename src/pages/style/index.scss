@@ -83,7 +83,7 @@ html, body
     {
         @extend %__font-center;
 
-        margin-bottom: 8px;
+        margin-bottom: 12px;
 
         font-size: 16px;
 
@@ -96,5 +96,51 @@ html, body
     div:last-child
     {
         margin-bottom: 0;
+    }
+
+    &__modeswitch
+    {
+        .switch
+        {
+            margin: 0 auto;
+        }
+    }
+}
+
+.switch
+{
+    width: 35px;
+    height: 15px;
+
+    padding: 2.5px;
+
+    border: 1px solid var(--footer-color);
+    border-radius: 10px;
+
+    background: var(--footer-color);
+
+    cursor: pointer;
+
+    &__slider
+    {
+        position: relative;
+
+        left: 0;
+
+        width: 15px;
+        height: 15px;
+
+        border: 0 solid var(--footer-color);
+        border-radius: 15px;
+
+        background: var(--page-background-color);
+    }
+
+    &--active
+    {
+        .switch__slider
+        {
+            left: 19px;
+        }
     }
 }

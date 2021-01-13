@@ -98,6 +98,11 @@ function getPageByPath(path)
  */
 function replaceVariables(page, pageTitle, projectTitle, projectSubtitle = null)
 {
+    footer = `<div class="footer__modeswitch"><div class="switch"><div class="switch__slider"></div></div></div>`
+           + `<div class="footer__powered">Powered by`
+           + ` <a href="https://github.com/ghifari160/splash">Splash</a>`
+           + ` v${configLoader.getConfig().version}</div>`;
+
     if(projectSubtitle == null)
     {
         projectSubtitle = projectTitle;
@@ -109,7 +114,7 @@ function replaceVariables(page, pageTitle, projectTitle, projectSubtitle = null)
     page = page.replace(/\$\{PROJECT\.TITLE\}/gi, projectTitle);
     page = page.replace(/\$\{PROJECT\.SUBTITLE\}/gi, projectSubtitle);
 
-    page = page.replace(/\$\{FOOTER\}/gi, `<div class="footer__powered">Powered by <a href="https://github.com/ghifari160/splash">Splash</a> v${configLoader.getConfig().version}</div>`);
+    page = page.replace(/\$\{FOOTER\}/gi, footer);
 
     return page;
 }
