@@ -2,8 +2,7 @@
 @import "lightmode";
 @import "darkmode";
 
-body,
-body.lightmode
+@mixin body-lightmode()
 {
     --page-background-color: #{$default-light-color-1};
     
@@ -16,7 +15,7 @@ body.lightmode
     --footer-a-active-color: #{$default-light-color-3};
 }
 
-body.darkmode
+@mixin body-darkmode()
 {
     --page-background-color: #{$default-dark-color-1};
     
@@ -27,6 +26,17 @@ body.darkmode
     --footer-a-color: #{$default-dark-color-2};
     --footer-a-hover-color: #{$default-dark-color-2};
     --footer-a-active-color: #{$default-dark-color-3};
+}
+
+body,
+body.lightmode
+{
+    @include body-lightmode();
+}
+
+body.darkmode
+{
+    @include body-darkmode();
 }
 
 html, body
@@ -142,5 +152,21 @@ html, body
         {
             left: 19px;
         }
+    }
+}
+
+@media (prefers-color-scheme: light)
+{
+    body
+    {
+        @include body-lightmode();
+    }
+}
+
+@media (prefers-color-scheme: dark)
+{
+    body
+    {
+        @include body-darkmode();
     }
 }

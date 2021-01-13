@@ -3,10 +3,19 @@ import "../style/index.scss";
 function onReady()
 {
     // Theme mode normalizations
-    document.body.classList.add("lightmode");
+
+    // System preference detections
+    const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+    if(prefersDarkScheme.matches)
+        document.body.classList.add("darkmode");
+    else
+        document.body.classList.add("lightmode");
 
     if(document.body.classList.contains("darkmode"))
         document.querySelector(".footer__modeswitch .switch").classList.add("switch--active");
+
+    // End of theme mode normalizations
 
     // Toggle switch handler
     document.querySelectorAll(".switch").forEach((el) =>
