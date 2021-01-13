@@ -15,6 +15,27 @@ const webpackConfig = require("../webpack.config")("", "");
 const buildLocation = "default";
 
 /**
+ * Stack of JS paths for caching
+ * 
+ * @type {string}
+ */
+let jsStack = [];
+
+/**
+ * Stack of JS basenames
+ * 
+ * @type {string}
+ */
+let jsBasenameStack = [];
+
+/**
+ * JS cache, keyed by path
+ * 
+ * @type {string} JS file
+ */
+let jsCache = [];
+
+/**
  * Stack of CSS paths for caching
  * 
  * @type {string}
@@ -51,6 +72,9 @@ catch(err){}
 
 log(LOG_LEVEL.INFO, `Scanning Webpack configuration`);
 
+jsStack.push(path.resolve(webpackConfig.output.path, webpackConfig.output.filename));
+jsBasenameStack.push(webpackConfig.output.filename);
+
 for(let i = 0; i < webpackConfig.plugins.length; i++)
 {
     if(webpackConfig.plugins[i] instanceof MiniCssExtractPlugin)
@@ -62,7 +86,23 @@ for(let i = 0; i < webpackConfig.plugins.length; i++)
         htmlQ.push(path.resolve(webpackConfig.output.path, webpackConfig.plugins[i].options.filename));
 }
 
-log(LOG_LEVEL.INFO, `Found ${cssStack.length} stylesheet(s) and ${htmlQ.length} HTML(s)!`);
+log(LOG_LEVEL.INFO, `Found ${jsStack.length} script(s), ${cssStack.length} stylesheet(s), and ${htmlQ.length} HTML(s)!`);
+
+log(LOG_LEVEL.INFO, `Caching script(s)`);
+
+for(let i = 0; i < jsStack.length; i++)
+{
+    try
+    {
+        jsCache[jsBasenameStack[i]] = fs.readFileSync(jsStack[i], { encoding: "utf8" });
+    }
+    catch(err)
+    {
+        log(LOG_LEVEL.WARN, `Unable to cache ${jsStack[i]}`);
+    }
+}
+
+log(LOG_LEVEL.INFO, `${Object.keys(jsCache).length} script(s) cached!`);
 
 log(LOG_LEVEL.INFO, `Caching stylesheet(s)`);
 
@@ -74,11 +114,11 @@ for(let i = 0; i < cssStack.length; i++)
     }
     catch(err)
     {
-        log(LOG_LEVEL.WARN, `Unabled to cache ${cssStack[i]}`);
+        log(LOG_LEVEL.WARN, `Unable to cache ${cssStack[i]}`);
     }
 }
 
-log(LOG_LEVEL.INFO, `${cssCache.length} sytlesheet(s) cached!`);
+log(LOG_LEVEL.INFO, `${Object.keys(cssCache).length} sytlesheet(s) cached!`);
 
 log(LOG_LEVEL.INFO, `Building HTML(s)`);
 
@@ -89,6 +129,11 @@ while(htmlQ.length > 0)
     try
     {
         let html = fs.readFileSync(htmlPath, { encoding: "utf8" });
+
+        for(let i = 0; i < jsBasenameStack.length; i++)
+        {
+            html = html.replace(`<script src="${jsBasenameStack[i]}"></script>`, `<script>${jsCache[jsBasenameStack[i]]}</script>`);
+        }
 
         for(let i = 0; i < cssBasenameStack.length; i++)
         {
@@ -101,7 +146,7 @@ while(htmlQ.length > 0)
     }
     catch(err)
     {
-        log(LOG_LEVEL.WARN, `Unabled to build ${htmlPath}`);
+        log(LOG_LEVEL.WARN, `Unable to build ${htmlPath}`);
     }
 }
 
