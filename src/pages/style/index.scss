@@ -48,6 +48,8 @@ html, body
     height: 100%;
 
     background-color: var(--page-background-color);
+
+    transition: background 500ms;
 }
 
 .header
@@ -62,6 +64,8 @@ html, body
     transform: translateY(-50%);
 
     color: var(--header-color);
+
+    transition: color 500ms;
 
     &__title
     {
@@ -89,6 +93,8 @@ html, body
 
     color: var(--footer-color);
 
+    transition: color 500ms;
+
     div
     {
         @extend %__font-center;
@@ -99,7 +105,7 @@ html, body
 
         a
         {
-            @include a(var(--footer-a-color), underline, var(--footer-a-hover-color), none, var(--footer-a-active-color), none);
+            @include a(var(--footer-a-color), 1px solid var(--footer-a-color), var(--footer-a-hover-color), none, var(--footer-a-active-color), none);
         }
     }
 
@@ -131,6 +137,8 @@ html, body
 
     cursor: pointer;
 
+    transition: background 500ms;
+
     &__slider
     {
         position: relative;
@@ -144,6 +152,8 @@ html, body
         border-radius: 15px;
 
         background: var(--page-background-color);
+
+        transition: left 500ms, background 500ms;
     }
 
     &--active

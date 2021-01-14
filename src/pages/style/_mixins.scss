@@ -1,24 +1,27 @@
-@mixin a($color, $text-decoration, $hover-color, $hover-text-decoration, $active-color, $active-text-decoration)
+@mixin a($color, $border-bottom, $hover-color, $hover-border-bottom, $active-color, $active-border-bottom)
 {
     color: $color;
-    text-decoration: $text-decoration;
+    text-decoration: none;
+    border-bottom: $border-bottom;
+
+    transition: all 500ms ease;
 
     &:visited
     {
         color: $color;
-        $text-decoration: $text-decoration;
+        border-bottom: $border-bottom;
     }
 
     &:hover, &:focus
     {
         color: $hover-color;
-        text-decoration: $hover-text-decoration;
+        border-bottom: $hover-border-bottom;
     }
 
     &:active
     {
         color: $active-color;
-        text-decoration: $active-text-decoration;
+        border-bottom: $active-border-bottom;
     }
 }
 
