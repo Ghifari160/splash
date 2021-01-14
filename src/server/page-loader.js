@@ -94,9 +94,10 @@ function getPageByPath(path)
  * @param {string} pageTitle Page title (project title if `projectSubtitle` is not set)
  * @param {string} projectTitle Project title (project subtitle if `projectSubtitle` is not set)
  * @param {string} [projectSubtitle] Project subtitle. Generally it is the project ID
+ * @param {string} [pageTheme] Page theme mode (`light` or `dark`)
  * @returns {string} Page contents with variables replaced
  */
-function replaceVariables(page, pageTitle, projectTitle, projectSubtitle = null)
+function replaceVariables(page, pageTitle, projectTitle, projectSubtitle = null, pageTheme = null)
 {
     footer = `<div class="footer__modeswitch"><div class="switch"><div class="switch__slider"></div></div></div>`
            + `<div class="footer__powered">Powered by`
@@ -108,6 +109,11 @@ function replaceVariables(page, pageTitle, projectTitle, projectSubtitle = null)
         projectSubtitle = projectTitle;
         projectTitle = pageTitle;
     }
+
+    if(pageTheme == null)
+        pageTheme = "";
+
+    page = page.replace(/\$\{PAGE\.THEME\}/gi, pageTheme);
 
     page = page.replace(/\$\{PROJECT\.PAGE\_TITLE\}/gi, pageTitle);
 

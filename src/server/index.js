@@ -294,6 +294,29 @@ app.get("/", (req, res) =>
 
     let projectIndex = -1;
 
+    let pageTheme;
+
+    // Cookie detection
+    if(req.headers.cookie != null)
+    {
+        let cookies = req.headers.cookie.split("&");
+
+        cookies.forEach((cookie) =>
+        {
+            switch(cookie.split("=")[0])
+            {
+                case "theme":
+                    pageTheme = cookie.split("=")[1];
+            }
+        });
+    }
+
+    // Theme cookie handling
+    if(pageTheme == "dark")
+        pageTheme = "darkmode";
+    else if(pageTheme == "light")
+        pageTheme = "lightmode";
+
     // Linearly for project configuration by domain
     for(let i = 0; i < config.projects.length; i++)
     {
@@ -385,7 +408,7 @@ app.get("/", (req, res) =>
         }
         else
         {
-            page = replaceVariables(page, page_title, title, subtitle);
+            page = replaceVariables(page, page_title, title, subtitle, pageTheme);
 
             res.send(page);
         }
