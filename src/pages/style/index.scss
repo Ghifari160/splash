@@ -2,6 +2,8 @@
 @import "lightmode";
 @import "darkmode";
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap');
+
 @mixin body-lightmode()
 {
     --page-background-color: #{$default-light-color-1};
@@ -13,6 +15,8 @@
     --footer-a-color: #{$default-light-color-2};
     --footer-a-hover-color: #{$default-light-color-2};
     --footer-a-active-color: #{$default-light-color-3};
+
+    font-weight: 300;
 }
 
 @mixin body-darkmode()
@@ -26,6 +30,8 @@
     --footer-a-color: #{$default-dark-color-2};
     --footer-a-hover-color: #{$default-dark-color-2};
     --footer-a-active-color: #{$default-dark-color-3};
+
+    font-weight: 300;
 }
 
 body,
