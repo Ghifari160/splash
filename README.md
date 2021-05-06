@@ -23,7 +23,7 @@ Install _all_ dependencies for this project.
 npm i
 ```
 
-Build the development documentations
+~~Build the development documentations~~ [[1](#workflow-updates)]
 
 ``` shell
 npm run docs:dev
@@ -57,7 +57,7 @@ Build default pages.
 npm run pages:build
 ```
 
-Build the public documentations
+~~Build the public documentations~~ [[1](#workflow-updates)]
 
 ``` shell
 npm run docs:build
@@ -79,3 +79,7 @@ webpack.config.js
 ```
 
 Package up the remaining files and directories.
+
+## Workflow Updates
+
+1. JSDoc has been removed from this project's workflow while we wait for a release that addresses security vulnurabilities ([CVE-2021-23358](https://github.com/advisories/GHSA-cf4h-3jhx-xvhq)). A [pull request](https://github.com/jsdoc/jsdoc/pull/1906) exists.
