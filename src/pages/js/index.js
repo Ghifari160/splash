@@ -1,26 +1,74 @@
 import "../style/index.scss";
 
+/**
+ * Check if storage is supported and available
+ * @param {Storage} type Storage type
+ * @returns Storage availability
+ */
+function storageAvailable(type)
+{
+    let storage;
+
+    try
+    {
+        storage = window[type];
+
+        let x = "__storage_test__";
+
+        storage.setItem(x, x);
+        storage.removeItem(x);
+
+        return true;
+    }
+    catch (e)
+    {
+        return e instanceof DOMException && (
+            e.code === 22 ||
+            e.code === 1014 ||
+            e.name === "QuotaExceededError" ||
+            e.name === "NS_ERROR_DOM_QUOTA_REACHED"
+        ) && (storage && storage.length !== 0);
+    }
+}
+
 function onReady()
 {
-    let theme,
-        themeSet = false;
+    let theme;
 
     // Theme mode normalizations
 
     // System preference detections
-    if(!themeSet)
-    {
-        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+    const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
 
-        if(prefersDarkScheme.matches)
+    if(prefersDarkScheme.matches)
+    {
+        document.body.classList.add("darkmode");
+        theme = "dark";
+    }
+    else
+    {
+        document.body.classList.add("lightmode");
+        theme = "light";
+    }
+
+    // User preference detections
+    if(storageAvailable("localStorage"))
+    {
+        let pref = window.localStorage.getItem("theme");
+
+        if(pref !== null && pref == "dark")
         {
-            document.body.classList.add("darkmode");
             theme = "dark";
+
+            document.body.classList.add("darkmode");
+            document.body.classList.remove("lightmode");
         }
-        else
+        else if(pref !== null && pref == "light")
         {
-            document.body.classList.add("lightmode");
             theme = "light";
+
+            document.body.classList.add("lightmode");
+            document.body.classList.remove("darkmode");
         }
     }
 
@@ -48,6 +96,9 @@ function onReady()
             theme = "light";
         else
             theme = "dark";
+
+        if(storageAvailable("localStorage"))
+            window.localStorage.setItem("theme", theme);
     });
 }
 
