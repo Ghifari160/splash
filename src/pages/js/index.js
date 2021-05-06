@@ -5,30 +5,13 @@ function onReady()
     let theme,
         themeSet = false;
 
-    // Cookie detection
-
-    if(document.cookie != null)
-    {
-        let cookies = document.cookie.split("&");
-
-        cookies.forEach((cookie) =>
-        {
-            switch(cookie.split("=")[0])
-            {
-                case "theme":
-                    theme = cookie.split("=")[1];
-                    themeSet = true;
-            }
-        });
-    }
-
     // Theme mode normalizations
 
     // System preference detections
     if(!themeSet)
     {
         const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-        
+
         if(prefersDarkScheme.matches)
         {
             document.body.classList.add("darkmode");
@@ -65,8 +48,6 @@ function onReady()
             theme = "light";
         else
             theme = "dark";
-
-        document.cookie = `theme=${theme}`;
     });
 }
 
