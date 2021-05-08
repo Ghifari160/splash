@@ -2,75 +2,76 @@
  * Default pages building script
  */
 
-const fs = require("fs"),
-      path = require("path");
+const fs = require("fs");
+const path = require("path");
+const Logger = require("logger");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
-const { LOG_LEVEL, log } = require("../src/server/log");
 
 const webpackConfig = require("../webpack.config")("", "");
 
 const buildLocation = "default";
 
+let logger = new Logger();
+
 /**
  * Stack of JS paths for caching
- * 
+ *
  * @type {string}
  */
 let jsStack = [];
 
 /**
  * Stack of JS basenames
- * 
+ *
  * @type {string}
  */
 let jsBasenameStack = [];
 
 /**
  * JS cache, keyed by path
- * 
+ *
  * @type {string} JS file
  */
 let jsCache = [];
 
 /**
  * Stack of CSS paths for caching
- * 
+ *
  * @type {string}
  */
 let cssStack = [];
 
 /**
  * Stack of CSS basenames
- * 
+ *
  * @type {string}
  */
 let cssBasenameStack = [];
 
 /**
  * Queue of HTML for building
- * 
+ *
  * @type {string}
  */
 let htmlQ = [];
 
 /**
  * CSS cache, keyed by path
- * 
+ *
  * @type {string} CSS file
  */
 let cssCache = [];
 
-log(LOG_LEVEL.INFO, `Preparing directories`);
+logger.log(Logger.LOG_LEVEL.INFO, `Preparing directories`);
 try
 {
     fs.mkdirSync(path.resolve(process.cwd(), buildLocation));
 }
 catch(err){}
 
-log(LOG_LEVEL.INFO, `Scanning Webpack configuration`);
+logger.log(Logger.LOG_LEVEL.INFO, `Scanning Webpack configuration`);
 
 jsStack.push(path.resolve(webpackConfig.output.path, webpackConfig.output.filename));
 jsBasenameStack.push(webpackConfig.output.filename);
@@ -86,9 +87,9 @@ for(let i = 0; i < webpackConfig.plugins.length; i++)
         htmlQ.push(path.resolve(webpackConfig.output.path, webpackConfig.plugins[i].options.filename));
 }
 
-log(LOG_LEVEL.INFO, `Found ${jsStack.length} script(s), ${cssStack.length} stylesheet(s), and ${htmlQ.length} HTML(s)!`);
+logger.log(Logger.LOG_LEVEL.INFO, `Found ${jsStack.length} script(s), ${cssStack.length} stylesheet(s), and ${htmlQ.length} HTML(s)!`);
 
-log(LOG_LEVEL.INFO, `Caching script(s)`);
+logger.log(Logger.LOG_LEVEL.INFO, `Caching script(s)`);
 
 for(let i = 0; i < jsStack.length; i++)
 {
@@ -98,13 +99,13 @@ for(let i = 0; i < jsStack.length; i++)
     }
     catch(err)
     {
-        log(LOG_LEVEL.WARN, `Unable to cache ${jsStack[i]}`);
+        logger.log(Logger.LOG_LEVEL.WARN, `Unable to cache ${jsStack[i]}`);
     }
 }
 
-log(LOG_LEVEL.INFO, `${Object.keys(jsCache).length} script(s) cached!`);
+logger.log(Logger.LOG_LEVEL.INFO, `${Object.keys(jsCache).length} script(s) cached!`);
 
-log(LOG_LEVEL.INFO, `Caching stylesheet(s)`);
+logger.log(Logger.LOG_LEVEL.INFO, `Caching stylesheet(s)`);
 
 for(let i = 0; i < cssStack.length; i++)
 {
@@ -114,13 +115,13 @@ for(let i = 0; i < cssStack.length; i++)
     }
     catch(err)
     {
-        log(LOG_LEVEL.WARN, `Unable to cache ${cssStack[i]}`);
+        logger.log(Logger.LOG_LEVEL.WARN, `Unable to cache ${cssStack[i]}`);
     }
 }
 
-log(LOG_LEVEL.INFO, `${Object.keys(cssCache).length} sytlesheet(s) cached!`);
+logger.log(Logger.LOG_LEVEL.INFO, `${Object.keys(cssCache).length} sytlesheet(s) cached!`);
 
-log(LOG_LEVEL.INFO, `Building HTML(s)`);
+logger.log(Logger.LOG_LEVEL.INFO, `Building HTML(s)`);
 
 while(htmlQ.length > 0)
 {
@@ -146,13 +147,13 @@ while(htmlQ.length > 0)
     }
     catch(err)
     {
-        log(LOG_LEVEL.WARN, `Unable to build ${htmlPath}`);
+        log(Logger.LOG_LEVEL.WARN, `Unable to build ${htmlPath}`);
     }
 }
 
-log(LOG_LEVEL.INFO, `HTML(s) built!`);
+logger.log(Logger.LOG_LEVEL.INFO, `HTML(s) built!`);
 
-// log(LOG_LEVEL.INFO, `Cleaning up`);
+// logger.log(Logger.LOG_LEVEL.INFO, `Cleaning up`);
 
 // try
 // {
@@ -160,8 +161,8 @@ log(LOG_LEVEL.INFO, `HTML(s) built!`);
 // }
 // catch(err)
 // {
-//     log(LOG_LEVEL.WARN, `Error while cleaning up`);
-//     log(LOG_LEVEL.WARN, err);
+//     logger.log(Logger.LOG_LEVEL.WARN, `Error while cleaning up`);
+//     logger.log(Logger.LOG_LEVEL.WARN, err);
 // }
 
-log(LOG_LEVEL.INFO, `Done!`);
+logger.log(Logger.LOG_LEVEL.INFO, `Done!`);
