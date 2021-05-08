@@ -1,38 +1,35 @@
 /**
  * Express Error Handler
- * 
+ *
  * @module error-handler
  */
 
-const COLOR = require("./color"),
-      { LOG_LEVEL, log, log_request, log_redirect } = require("./log"),
-      configLoader = require("./config-loader"),
-      { getPageById, replaceVariables } = require("./page-loader");
+const Core = require("./core");
+const configLoader = require("./config-loader");
+const { getPageById, replaceVariables } = require("./page-loader");
 
 /**
  * @typedef module:error-handler.Request
- * 
+ *
  * @property {Date} exec_start Request processing start time
  * @property {string} project_id Project ID of the response
  */
 
 /**
  * Request stack for error tracing
- * 
  * @static
  * @type {module:error-handler.Request[]}
- * 
+ *
  */
 let errorReqStack = [];
 
 /**
  * Express error handler.
- * 
  * @static
- * @param {object} err 
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * @param {object} err
+ * @param {object} req
+ * @param {object} res
+ * @param {function} next
  */
 function errorHandler(err, req, res, next)
 {
@@ -48,7 +45,7 @@ function errorHandler(err, req, res, next)
         case 404:
             resp = "Not Found.";
             break;
-        
+
         case 500:
         default:
             resp = "Internal Error.";
@@ -56,7 +53,7 @@ function errorHandler(err, req, res, next)
     }
 
     res.status(status);
-    
+
     respFile = getPageById("ERROR");
 
     if(respFile)
@@ -69,7 +66,7 @@ function errorHandler(err, req, res, next)
     else
         res.send(`${status} ${resp}`);
 
-    log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, request.project_id, status, request.exec_start);
+    Core.log_request(Core.LOG_LEVEL.INFO, req.method, req.path, req.hostname, request.project_id, status, request.exec_start);
 }
 
 module.exports =

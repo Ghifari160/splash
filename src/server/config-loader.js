@@ -1,22 +1,20 @@
 /**
  * Config loader
- * 
+ *
  * @module config-loader
  */
 
 const fs = require("fs");
-
 const semver = require("semver");
 
-const COLOR = require("./color"),
-      { LOG_LEVEL, log, log_request } = require("./log");
+const Core = require("./core");
 
-const config_location = "data/config.json",
-      version_current = "0.3.1";
+const config_location = "data/config.json";
+const version_current = "0.3.1";
 
 /**
  * Sanitizes config version object
- * 
+ *
  * @private
  * @param {module:config-loader.Config} config Configuration object
  */
@@ -26,13 +24,13 @@ function __sanitizeConfigObj_version(config)
     {
         config.version = version_current;
 
-        log(LOG_LEVEL.WARN, `Version is outdated or missing. Upgrading config file`);
+        Core.logger.log(Core.LOG_LEVEL.WARN, `Version is outdated or missing. Upgrading config file`);
     }
 }
 
 /**
  * Server configuration
- * 
+ *
  * @typedef module:config-loader.Config_Server
  * @property {string} port **Deprecated. Use `server.listen_port` instead!** Listening port (i.e. `8080`)
  * @property {string} listen_port Listening port (i.e. `8080`)
@@ -41,7 +39,7 @@ function __sanitizeConfigObj_version(config)
 
 /**
  * Sanitizes config server object
- * 
+ *
  * @private
  * @param {module:config-loader.Config} config Configuration object
  */
@@ -51,11 +49,11 @@ function __sanitizeConfigObj_server(config)
     {
         config.server = {};
 
-        log(LOG_LEVEL.WARN, `Missing server configuration. Generating default server configuration`);
+        Core.logger.log(Core.LOG_LEVEL.WARN, `Missing server configuration. Generating default server configuration`);
     }
 
     if(config.server.hasOwnProperty("port"))
-        log(LOG_LEVEL.WARN, `server.port is deprecated and will not be supported in future versions`);
+        Core.logger.log(Core.LOG_LEVEL.WARN, `server.port is deprecated and will not be supported in future versions`);
 
     if(!config.server.hasOwnProperty("listen_port"))
     {
@@ -63,13 +61,13 @@ function __sanitizeConfigObj_server(config)
         {
             config.server.listen_port = config.server.port;
 
-            log(LOG_LEVEL.WARN, `Missing server.listen_port. Setting server.listen_port to server.port`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Missing server.listen_port. Setting server.listen_port to server.port`);
         }
         else
         {
             config.server.listen_port = "8080";
 
-            log(LOG_LEVEL.WARN, `Missing server.listen_port. Setting to default server listen port`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Missing server.listen_port. Setting to default server listen port`);
         }
     }
 
@@ -79,34 +77,34 @@ function __sanitizeConfigObj_server(config)
         {
             config.server.public_port = config.server.port;
 
-            log(LOG_LEVEL.WARN, `Missing server.public_port. Setting server.public_port to server.port`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Missing server.public_port. Setting server.public_port to server.port`);
         }
         else if(config.server.hasOwnProperty("listen_port"))
         {
             config.server.public_port = config.server.listen_port;
 
-            log(LOG_LEVEL.WARN, `Missing server.public_port. Setting server.public_port to server.listen_port`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Missing server.public_port. Setting server.public_port to server.listen_port`);
         }
         else
         {
             config.server.public_port = "8080";
 
-            log(LOG_LEVEL.WARN, `Missing server.public_port. Setting to default server public port`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Missing server.public_port. Setting to default server public port`);
         }
     }
 }
 
 /**
  * Project IDs
- * 
+ *
  * @private
- * @type {string[]} 
+ * @type {string[]}
  */
 let __projects = [];
 
 /**
  * Working copy of project configurations (to prevent overwriting the config file)
- * 
+ *
  * @private
  * @type {module:config-loader.Config_Project[]}
  */
@@ -121,7 +119,7 @@ let __projectsCopy = [];
 
 /**
  * Project relationships
- * 
+ *
  * @private
  * @type {module:config-loader.Config_Project_Relations[]}
  */
@@ -136,7 +134,7 @@ let __projects_rel = [];
 
 /**
  * Invalid projects for deletion
- * 
+ *
  * @private
  * @type {module:config-loader.Config_Project_Invalid[]}
  * */
@@ -144,7 +142,7 @@ let __projects_invalid = [];
 
 /**
  * Project configuration
- * 
+ *
  * @typedef module:config-loader.Config_Project
  * @property {string} id Project ID
  * @property {string} [cn] Project common name (i.e. `Project`)
@@ -158,7 +156,7 @@ let __projects_invalid = [];
 
 /**
  * Sanitizes config projects array
- * 
+ *
  * @private
  * @param {module:config-loader.Config} config Configuration object
  */
@@ -178,7 +176,7 @@ function __sanitizeConfigObj_projects(config)
 
             __projects_invalid.push({ index: i });
 
-            log(LOG_LEVEL.WARN, `Missing project id for project(${i})! Skipping project`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Missing project id for project(${i})! Skipping project`);
         }
 
         if(!invalid && project.hasOwnProperty("redirect"))
@@ -253,7 +251,7 @@ function __sanitizeConfigObj_removeInvalidProjects()
 
 /**
  * Configuration object
- * 
+ *
  * @typedef module:config-loader.Config
  * @property {string} version Version of the generating app
  * @property {module:config-loader.Config_Server} server Server configuration
@@ -262,7 +260,7 @@ function __sanitizeConfigObj_removeInvalidProjects()
 
 /**
  * Sanitizes config object
- * 
+ *
  * @private
  * @param {string} configStr JSON string of the configuration object
  * @param {boolean} [sanitizeVersion] Sanitize the version configuration object. If unset, the object will be sanitized
@@ -287,7 +285,7 @@ function __sanitizeConfigObj(configStr, sanitizeVersion = true)
 
 /**
  * Loads the configuration file to memory
- * 
+ *
  * @private
  * @param {string} path Path to configuration file
  */
@@ -308,7 +306,7 @@ function __loadConfig(path)
 
 /**
  * Writes the configuration object to file
- * 
+ *
  * @private
  * @param {string} path Path to configuration file
  */
@@ -321,7 +319,7 @@ function __writeConfig(config, path)
 
 /**
  * Loads the configuration file into memory and construct the sanitized object
- * 
+ *
  * @static
  * @param {boolean} [sanitizeVersion] Sanitize the version configuration object. If unset, the object will be sanitized
  * @returns {module:config-loader.Config} Sanitized configuration object

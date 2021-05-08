@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
+    "logger": "https://github.com/Ghifari160/logger",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "semver": "^7.3.2"

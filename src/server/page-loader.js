@@ -1,18 +1,17 @@
 /**
  * Page loader
- * 
+ *
  * @module page-loader
  */
 
 const fs = require("fs");
 
-const COLOR = require("./color"),
-      { LOG_LEVEL, log, log_request, log_redirect } = require("./log"),
-      configLoader = require("./config-loader");
+const Core = require("./core");
+const configLoader = require("./config-loader");
 
 /**
  * Pages cached by path
- * 
+ *
  * @private
  * @type {string}
  */
@@ -20,7 +19,7 @@ let pagesByPath = [];
 
 /**
  * Pages cached by ID
- * 
+ *
  * @private
  * @type {string}
  */
@@ -28,7 +27,7 @@ let pagesById = [];
 
 /**
  * Loads and caches pages
- * 
+ *
  * @static
  * @param {string} path Path to page file
  * @param {string} [id] Page ID
@@ -47,13 +46,13 @@ function loadPage(path, id)
     }
     catch(err)
     {
-        log(LOG_LEVEL.WARN, `Error loading page ${path}. Skipping!`);
+        Core.logger.log(Core.LOG_LEVEL.WARN, `Error loading page ${path}. Skipping!`);
     }
 }
 
 /**
  * Gets page from cache by ID
- * 
+ *
  * @static
  * @param {string} id Page ID
  * @returns {string|boolean} Page contents or `false` if not found
@@ -62,13 +61,13 @@ function getPageById(id)
 {
     if(id in pagesById)
         return pagesById[id];
-    
+
     return false;
 }
 
 /**
  * Gets page from cache by path
- * 
+ *
  * @static
  * @param {string} path Path to page file
  * @returns {string|boolean} Page contents or `false` if not found
@@ -83,12 +82,12 @@ function getPageByPath(path)
 
 /**
  * Replace variables
- * 
+ *
  * __Note for v0.4.0+:__ This function now supports `pageTitle` parameter. To prevent breaking changes,
  * `projectSubtitle` is now an optional parameter. If `projectSubtitle` is unset, it is
  * assumed that `projectTitle` is the project subtitle, `pageTitle` is the project title, and
  * the page title is unconfigured (and will therefore be set equal to the project title).
- * 
+ *
  * @static
  * @param {string} page Page contents. Use {@link module:page-loader.getPageByPath} or {@link module:page-loader.getPageById}
  * @param {string} pageTitle Page title (project title if `projectSubtitle` is not set)

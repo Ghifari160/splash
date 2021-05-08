@@ -1,18 +1,16 @@
-const fs = require("fs"),
-      path = require("path"),
-      readline = require("readline");
-
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
 const express = require("express");
 
-const COLOR = require("./color"),
-      { LOG_LEVEL, log, log_request, log_redirect } = require("./log"),
-      configLoader = require("./config-loader"),
-      { errorReqStack: errReqStack, errorHandler } = require("./error-handler"),
-      { loadPage, getPageById, getPageByPath, replaceVariables } = require("./page-loader");
+const Core = require("./core");
+const configLoader = require("./config-loader");
+const { errorReqStack: errReqStack, errorHandler } = require("./error-handler");
+const { loadPage, getPageById, getPageByPath, replaceVariables } = require("./page-loader");
 
 /**
  * Timeout for graceful shutdown attempt
- * 
+ *
  * @private
  * @type {number}
  */
@@ -28,11 +26,11 @@ const app = express();
 
 /**
  * Shutdown the process
- * 
+ *
  * By default, it will attempt to gracefully shutdown the server by closing all remaining
  * connections before shutting down the process. If the forceful shutdown flag is set, no attempt
  * will be made to close the remaining connections.
- * 
+ *
  * @private
  * @param {boolean} [force] Forceful shutdown flag
  */
@@ -40,7 +38,7 @@ function shutdown(force = false)
 {
     if(force)
         process.exit();
-        
+
     // Gracefully close remaining connections
     server.close(() =>
     {
@@ -49,7 +47,7 @@ function shutdown(force = false)
 
     setTimeout(() =>
     {
-        log(LOG_LEVEL.SEVERE, "Could not close connections in time! Forcefully shutting down.");
+        Core.logger.log(Core.LOG_LEVEL.SEVERE, "Could not close connections in time! Forcefully shutting down.");
 
         process.exit(1);
     }, shutdownTimeout);
@@ -57,64 +55,64 @@ function shutdown(force = false)
 
 /**
  * SIG{QUIT} handler helper function
- * 
+ *
  * @private
  * @param {string} signal Signal type (i.e. `SIGINT` or `SIGTERM`)
  * @param {boolean} [force] Forceful shutdown flag
  */
 function __sigquit(signal, force = false)
 {
-    log(LOG_LEVEL.INFO, `${signal.toUpperCase()} caught! Exiting...`);
+    Core.logger.log(Core.LOG_LEVEL.INFO, `${signal.toUpperCase()} caught! Exiting...`);
 
     shutdown(force);
 }
 
 /**
  * SIGHUP handler helper function
- * 
+ *
  * @private
  */
 function __sigusr2()
 {
-    log(LOG_LEVEL.INFO, "SIGUSR2 caught! Reloading configuration and cache...");
+    Core.logger.log(Core.LOG_LEVEL.INFO, "SIGUSR2 caught! Reloading configuration and cache...");
 
     __init();
 }
 
 /**
  * Initialization logger helper function
- * 
+ *
  * @private
- * @param {module:log.LOG_LEVEL} level Log level
+ * @param {module:Logger.LOG_LEVEL} level Log level
  * @param {string} message Message to log
  */
 function __log_init(level, message)
 {
     if(process.env.NODE_ENV === undefined || process.env.NODE_ENV === "development")
-        log(level, `[INIT] ${message}`);
+        Core.logger.log(level, `[INIT] ${message}`);
 }
 
 /**
  * Loads the server configuration
- * 
+ *
  * @private
  * @param {boolean} [sanitizeVersion] Sanitize the version configuration object. If unset, the object will be sanitized
  */
 function __init_loadConfig(sanitizeVersion = true)
 {
-    __log_init(LOG_LEVEL.INFO, "Loading configuration");
+    __log_init(Core.LOG_LEVEL.INFO, "Loading configuration");
 
     config = configLoader.getConfig(sanitizeVersion);
 }
 
 /**
  * Scans projects configuration and caches custom pages
- * 
+ *
  * @private
  */
 function __init_scanProjects()
 {
-    __log_init(LOG_LEVEL.INFO, "Scanning projects configuration and cache custom pages");
+    __log_init(Core.LOG_LEVEL.INFO, "Scanning projects configuration and cache custom pages");
 
     // Scan projects configuration and load and cache custom pages
     for(let i = 0; i < config.projects.length; i++)
@@ -123,7 +121,7 @@ function __init_scanProjects()
         {
             if(!fs.existsSync(path.resolve(process.cwd(), config.projects[i].page)))
             {
-                log(LOG_LEVEL.WARN, `Invalid page for project ${config.projects[i].id}: ${config.projects[i].page}. Setting to root`);
+                Core.logger.log(Core.LOG_LEVEL.WARN, `Invalid page for project ${config.projects[i].id}: ${config.projects[i].page}. Setting to root`);
 
                 config.projects[i].page = "";
                 delete config.projects[i].page;
@@ -136,13 +134,13 @@ function __init_scanProjects()
 
 /**
  * Cache default pages
- * 
+ *
  * @private
  */
 function __init_cacheDefaultPages()
 {
-    __log_init(LOG_LEVEL.INFO, "Caching default pages to memory");
-    
+    __log_init(Core.LOG_LEVEL.INFO, "Caching default pages to memory");
+
     // Load and cache default pages
     loadPage(path.resolve(process.cwd(), "default/error.html"), "ERROR");
     loadPage(path.resolve(process.cwd(), "default/splash.html"), "SPLASH");
@@ -150,20 +148,20 @@ function __init_cacheDefaultPages()
 
 /**
  * Verify error page configuration and cache custom error page
- * 
+ *
  * @private
  */
 function __init_verifyErrorPage()
 {
-    __log_init(LOG_LEVEL.INFO, "Verifying error page configuration");
-    
+    __log_init(Core.LOG_LEVEL.INFO, "Verifying error page configuration");
+
     // Verify error page configuration
     if(config.server.hasOwnProperty("error_page"))
     {
         if(!fs.existsSync(path.resolve(process.cwd(), config.server.error_page)))
         {
             config.server.error_page = path.resolve(process.cwd(), "default/error.html");
-            log(LOG_LEVEL.WARN, `Invalid error page configuration. Setting to default`);
+            Core.logger.log(Core.LOG_LEVEL.WARN, `Invalid error page configuration. Setting to default`);
         }
         else
            loadPage(path.resolve(process.cwd(), config.server.error_page), "ERROR");
@@ -174,36 +172,38 @@ function __init_verifyErrorPage()
 
 /**
  * Check for Non-Hotreloadable (NHR) _configuration_ changes
- * 
+ *
  * @private
  */
 function __init_checkForNHRChanges()
 {
     let changes = [];
-    
+
     if(config_old.version != config.version)
         changes.push("version");
 
     if(config_old.server.listen_port != config.server.listen_port)
         changes.push("server.listen_port");
-    
+
     if(config_old.server.public_port != config.server.public_port)
         changes.push("server.public_port");
-    
+
     if(changes.length > 0)
     {
-        log(LOG_LEVEL.WARN, `Non-hotreloadable configuration changes detected! These changes will not apply until a server restart!`);
-        log(LOG_LEVEL.WARN, `Changed keys: ${changes.join(" ")}`);
+        Core.logger.log(Core.LOG_LEVEL.WARN, `Non-hotreloadable configuration changes detected! These changes will not apply until a server restart!`);
+        Core.logger.log(Core.LOG_LEVEL.WARN, `Changed keys: ${changes.join(" ")}`);
     }
 }
 
 /**
  * Initialize the server
- * 
+ *
  * @private
  */
 function __init()
 {
+    Core.init_logger();
+
     if(server_init)
         config_old = config;
 
@@ -252,7 +252,7 @@ __init();
 
 server = app.listen(config.server.listen_port, () =>
 {
-    log(LOG_LEVEL.INFO, `Server listening on ${config.server.listen_port}`);
+    Core.logger.log(Core.LOG_LEVEL.INFO, `Server listening on ${config.server.listen_port}`);
 });
 
 server.on("connection", (connection) =>
@@ -280,7 +280,7 @@ app.get("/static/*", (req, res, next) =>
         {
             res.sendFile(path.resolve(process.cwd(), req.path.substring(1)));
 
-            log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, "STATIC", 200, exec_start);
+            Core.log_request(Core.LOG_LEVEL.INFO, req.method, req.path, req.hostname, "STATIC", 200, exec_start);
         }
     });
 });
@@ -388,14 +388,14 @@ app.get("/", (req, res) =>
 
             res.redirect(302, `//${red}:${config.server.public_port}/`);
 
-            log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, project_id, 302, exec_start);
+            Core.log_redirect(Core.LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, project_id, 302, exec_start);
         }
         // Redirect to any target
         else
         {
             res.redirect(302, red);
 
-            log_redirect(LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, 302, project_id, exec_start);
+            Core.log_redirect(Core.LOG_LEVEL.INFO, req.method, req.path, req.hostname, red, 302, project_id, exec_start);
         }
     }
     // Serve splash page
@@ -413,7 +413,7 @@ app.get("/", (req, res) =>
             res.send(page);
         }
 
-        log_request(LOG_LEVEL.INFO, req.method, req.path, req.hostname, project_id, 200, exec_start);
+        Core.log_request(Core.LOG_LEVEL.INFO, req.method, req.path, req.hostname, project_id, 200, exec_start);
     }
 });
 
