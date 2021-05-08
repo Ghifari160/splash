@@ -10,7 +10,7 @@ const semver = require("semver");
 const Core = require("./core");
 
 const config_location = "data/config.json";
-const version_current = "0.3.1";
+const version_current = "0.4.0";
 
 /**
  * Sanitizes config version object
