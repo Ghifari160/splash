@@ -56,7 +56,8 @@ RUN set -x && \
     apt update && \
     apt install --no-install-recommends --no-install-suggests -y nodejs && \
     apt clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    npm i -g npm
 
 ################
 ##   Splash   ##
