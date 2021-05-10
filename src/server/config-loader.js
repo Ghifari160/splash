@@ -9,7 +9,8 @@ const semver = require("semver");
 
 const Core = require("./core");
 
-const config_location = "data/config.json";
+const legacy_config_location = "data/config.json";
+const config_location = "config.json";
 const version_current = "0.4.0";
 
 /**
@@ -326,8 +327,27 @@ function __writeConfig(config, path)
  */
 function getConfig(sanitizeVersion = true)
 {
-    let config = __sanitizeConfigObj(__loadConfig(config_location), sanitizeVersion);
+    let config;
 
+    // Missing config.json
+    if(!fs.existsSync(config_location))
+    {
+        // Read from data/config.json
+        if(fs.existsSync(legacy_config_location))
+        {
+            config = __sanitizeConfigObj(__loadConfig(legacy_config_location), sanitizeVersion);
+
+            Core.logger.log(Core.LOG_LEVEL.WARN, "config.json exists in data/ directory. This is legacy behavior. Moving config.json root Splash directory");
+        }
+        // Create config.json
+        else
+            config = __sanitizeConfigObj("{}", sanitizeVersion);
+    }
+    // Read from config.json
+    else
+        config = __sanitizeConfigObj(__loadConfig(config_location), sanitizeVersion);
+
+    // Save into config.json
     __writeConfig(config, config_location);
 
     config.projects = __projectsCopy;

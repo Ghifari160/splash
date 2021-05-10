@@ -4,3 +4,4 @@ docs/
 dist/
 .DS_Store
 default/
+config.json
