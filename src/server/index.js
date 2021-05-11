@@ -358,6 +358,11 @@ app.get("/", (req, res) =>
         subtitle = project_id;
     }
 
+    // Replace server variables in project properties
+    page_title = replaceVariables(page_title, page_title, title, subtitle);
+    title = replaceVariables(title, page_title, title, subtitle);
+    subtitle = replaceVariables(subtitle, page_title, title, subtitle);
+
     // Redirect to target
     if(projectIndex > -1 && config.projects[projectIndex].hasOwnProperty("redirect"))
     {
