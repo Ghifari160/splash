@@ -7,6 +7,7 @@ const Core = require("./core");
 const configLoader = require("./config-loader");
 const { errorReqStack: errReqStack, errorHandler } = require("./error-handler");
 const { loadPage, getPageById, getPageByPath, replaceVariables } = require("./page-loader");
+const DataLoader = require("./data-loader");
 
 /**
  * Timeout for graceful shutdown attempt
@@ -101,8 +102,10 @@ function __log_init(level, message)
 function __init_loadConfig(sanitizeVersion = true)
 {
     __log_init(Core.LOG_LEVEL.INFO, "Loading configuration");
-
     config = configLoader.getConfig(sanitizeVersion);
+
+    __log_init(Core.LOG_LEVEL.INFO, "Loading projects");
+    config.projects = DataLoader.getProjects();
 }
 
 /**
@@ -217,6 +220,8 @@ function __init()
     __init_scanProjects();
 
     server_init = true;
+
+    Core.logger.log(Core.LOG_LEVEL.INFO, `${config.projects.length} projects loaded`);
 }
 
 readline.emitKeypressEvents(process.stdin);
@@ -305,7 +310,7 @@ app.get("/", (req, res) =>
     if(projectIndex < 0)
         project_id = req.hostname;
     else
-        project_id = config.__projects[projectIndex];
+        project_id = config.projects[projectIndex];
 
     errReqStack.push({ exec_start: exec_start, project_id: project_id });
 
