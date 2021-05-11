@@ -257,7 +257,7 @@ __init();
 
 server = app.listen(config.server.listen_port, () =>
 {
-    Core.logger.log(Core.LOG_LEVEL.INFO, `Server listening on ${config.server.listen_port}`);
+    Core.logger.log(Core.LOG_LEVEL.INFO, `Server listening on ${config.server.listen_port} for instance ${config.instance.id}`);
 });
 
 server.on("connection", (connection) =>

@@ -6,6 +6,7 @@
 
 const fs = require("fs");
 const semver = require("semver");
+const uuid = require("uuid");
 
 const Core = require("./core");
 
@@ -96,10 +97,36 @@ function __sanitizeConfigObj_server(config)
 }
 
 /**
+ * Instance configuration
+ *
+ * @typedef module:config-loader.Config_Instance
+ * @property {string} id Instance ID
+ */
+
+/**
+ * Sanitizes config instance object
+ * @param {module:config-loader.Config} config Configuration object
+ */
+function __sanitizeConfigObj_instance(config)
+{
+    if(!config.hasOwnProperty("instance"))
+        config.instance = {};
+
+    // Generate instance.id from UUIDv4 if not present
+    if(!config.instance.hasOwnProperty("id"))
+    {
+        config.instance.id = uuid.v4();
+
+        Core.logger.log(Core.LOG_LEVEL.WARN, `Missing instance.id. Generating a random id`);
+    }
+}
+
+/**
  * Configuration object
  *
  * @typedef module:config-loader.Config
  * @property {string} version Version of the generating app
+ * @property {module:config-loader.Config_Instance} instance Instance configuration
  * @property {module:config-loader.Config_Server} server Server configuration
  * @property {module:config-loader.Config_Project[]} projects Projects configuration
  */
@@ -117,6 +144,8 @@ function __sanitizeConfigObj(configStr, sanitizeVersion = true)
 
     if(sanitizeVersion)
         __sanitizeConfigObj_version(config);
+
+    __sanitizeConfigObj_instance(config);
 
     __sanitizeConfigObj_server(config);
 

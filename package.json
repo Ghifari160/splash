@@ -42,6 +42,7 @@
     "logger": "https://github.com/Ghifari160/logger",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "semver": "^7.3.2"
+    "semver": "^7.3.2",
+    "uuid": "^3.4.0"
   }
 }
