@@ -23,28 +23,6 @@ RUN set -x && \
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 ################
-##    GOSU    ##
-################
-ENV GOSU_VERSION 1.12
-RUN set -eux && \
-    apt update && \
-    apt install --no-install-recommends --no-install-suggests -y ca-certificates dirmngr gnupg wget && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" && \
-    wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" && \
-    wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc" && \
-    export GNUPGHOME="$(mktemp -d)" && \
-    gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
-    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
-    command -v gpgconf && gpgconf --kill all || :; \
-    rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
-    apt purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
-    chmod +x /usr/local/bin/gosu && \
-    gosu --version && \
-    gosu nobody true
-
-################
 ##   Node.JS  ##
 ################
 ENV NODE_ENV production
@@ -57,20 +35,30 @@ RUN set -x && \
     apt install --no-install-recommends --no-install-suggests -y nodejs && \
     apt clean && \
     rm -rf /var/lib/apt/lists/* && \
-    npm i -g npm
+    npm i -g npm && \
+    npm cache clean --force
 
 ################
 ##   Splash   ##
 ################
-RUN set -x && \
-    mkdir -p /var/www/splash
+RUN mkdir -p /var/www/splash
+RUN chown node:node /var/www/splash
+RUN chmod 755 /var/www/splash
+
+# Splash copy
+# Uncomment for production
+# RUN curl -sL https://projects.gassets.space/splash/v0.4.0/splash-v0.4.0.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
+# Uncomment for /dev/con
+ADD splash.tar.gz /var/www/splash
+
+WORKDIR /var/www/splash
+RUN mkdir data
+RUN npm i --only=prod && npm cache clean --force
 
 COPY supervisor-splash.conf /etc/supervisor/conf.d/splash.conf
-
-COPY splash-setup.sh /init/splash-setup.sh
 COPY splash-init.sh /init/splash-init.sh
 
-VOLUME [ "/var/www/splash" ]
+VOLUME [ "/var/www/splash/data" ]
 
 EXPOSE 8080
 
