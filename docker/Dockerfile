@@ -1,6 +1,4 @@
-FROM ubuntu:18.04
-
-LABEL maintainer "GHIFARI160 <ghifari@ghifari160.com>"
+FROM ubuntu:18.04 AS base
 
 RUN set -x && \
     apt update && \
@@ -10,17 +8,6 @@ RUN set -x && \
     apt clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir /init
-
-################
-## Supervisor ##
-################
-RUN set -x && \
-    apt update && \
-    apt install --no-install-recommends --no-install-suggests -y supervisor && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 ################
 ##   Node.JS  ##
@@ -45,21 +32,38 @@ RUN mkdir -p /var/www/splash
 RUN chown node:node /var/www/splash
 RUN chmod 755 /var/www/splash
 
-# Splash copy
-# Uncomment for production
-# RUN curl -sL https://projects.gassets.space/splash/v0.4.0/splash-v0.4.0.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
-# Uncomment for /dev/con
+################
+##  /dev/con  ##
+################
+FROM base AS dev
+
 ADD splash.tar.gz /var/www/splash
 
 WORKDIR /var/www/splash
 RUN mkdir data
 RUN npm i --only=prod && npm cache clean --force
 
-COPY supervisor-splash.conf /etc/supervisor/conf.d/splash.conf
-COPY splash-init.sh /init/splash-init.sh
+VOLUME [ "/var/www/splash/data" ]
+
+EXPOSE 8080
+
+ENTRYPOINT [ "node", "src/server" ]
+
+################
+## Production ##
+################
+FROM base
+
+LABEL org.opencontainers.image.authors="GHIFARI160 <ghifari@ghifari160.com>"
+
+RUN curl -sL https://projects.gassets.space/splash/v0.4.0/splash-v0.4.0.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
+
+WORKDIR /var/www/splash
+RUN mkdir data
+RUN npm i --only=prod && npm cache clean --force
 
 VOLUME [ "/var/www/splash/data" ]
 
 EXPOSE 8080
 
-CMD [ "/usr/bin/supervisord" ]
+ENTRYPOINT [ "node", "src/server" ]
