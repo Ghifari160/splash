@@ -310,7 +310,7 @@ app.get("/", (req, res) =>
     if(projectIndex < 0)
         project_id = req.hostname;
     else
-        project_id = config.projects[projectIndex];
+        project_id = config.projects[projectIndex].id;
 
     errReqStack.push({ exec_start: exec_start, project_id: project_id });
 
