@@ -115,9 +115,20 @@ function __sanitizeConfigObj_instance(config)
     // Generate instance.id from UUIDv4 if not present
     if(!config.instance.hasOwnProperty("id"))
     {
-        config.instance.id = uuid.v4();
+        let message = "Missing instance.id. ";
 
-        Core.logger.log(Core.LOG_LEVEL.WARN, `Missing instance.id. Generating a random id`);
+        if(typeof process.env.SPLASH_INSTANCE_ID !== "undefined" && process.env.SPLASH_INSTANCE_ID.length > 0)
+        {
+            config.instance.id = process.env.SPLASH_INSTANCE_ID;
+            message += "Setting instance ID from environment variable";
+        }
+        else
+        {
+            config.instance.id = uuid.v4();
+            message += "Generating a random ID.";
+        }
+
+        Core.logger.log(Core.LOG_LEVEL.WARN, message);
     }
 }
 

@@ -37,6 +37,8 @@ RUN chmod 755 /var/www/splash
 ################
 FROM base AS dev
 
+ENV SPLASH_INSTANCE_ID "/dev/con"
+
 ADD splash.tar.gz /var/www/splash
 
 WORKDIR /var/www/splash
