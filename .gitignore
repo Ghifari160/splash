@@ -1,5 +1,6 @@
 node_modules/
 data/
+data.old/
 docs/
 dist/
 .DS_Store

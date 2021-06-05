@@ -11,6 +11,8 @@
   "scripts": {
     "start": "node src/server",
     "stop": "pkill -SIGTERM Splash",
+    "test": "npm run test:unit",
+    "test:unit": "mocha 'test/server/*.js'",
     "pages:dev": "webpack-dev-server --mode development",
     "pages:webpack-build": "webpack --mode production",
     "pages:script-build": "node script/build-pages.js",
@@ -31,6 +33,7 @@
     "fibers": "^5.0.0",
     "html-webpack-plugin": "^4.5.0",
     "mini-css-extract-plugin": "^0.11.2",
+    "mocha": "^8.4.0",
     "prop-types": "^15.7.2",
     "sass": "^1.26.11",
     "sass-loader": "^10.0.2",
