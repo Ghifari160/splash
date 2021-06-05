@@ -1,5 +1,7 @@
 import "../style/index.scss";
 
+const themeNormalizationDelay = 500;
+
 /**
  * Check if storage is supported and available
  * @param {Storage} type Storage type
@@ -31,12 +33,10 @@ function storageAvailable(type)
     }
 }
 
-function onReady()
+let theme;
+
+function normalizeTheme()
 {
-    let theme;
-
-    // Theme mode normalizations
-
     // System preference detections
     const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -74,6 +74,16 @@ function onReady()
 
     if(document.body.classList.contains("darkmode"))
         document.querySelector(".footer__modeswitch .switch").classList.add("switch--active");
+}
+
+function onReady()
+{
+    // Theme mode normalizations
+
+    setTimeout(function()
+    {
+        normalizeTheme();
+    }, themeNormalizationDelay);
 
     // End of theme mode normalizations
 

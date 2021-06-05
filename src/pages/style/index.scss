@@ -4,10 +4,12 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap');
 
+$theme-variant-transition-time: 2500ms;
+
 @mixin body-lightmode()
 {
     --page-background-color: #{$default-light-color-1};
-    
+
     --header-color: #{$default-light-color-2};
 
     --footer-color: #{$default-light-color-2};
@@ -22,7 +24,7 @@
 @mixin body-darkmode()
 {
     --page-background-color: #{$default-dark-color-1};
-    
+
     --header-color: #{$default-dark-color-2};
 
     --footer-color: #{$default-dark-color-2};
@@ -55,7 +57,7 @@ html, body
 
     background-color: var(--page-background-color);
 
-    transition: background 500ms;
+    transition: background ($theme-variant-transition-time - 500ms);
 }
 
 .header
@@ -71,7 +73,7 @@ html, body
 
     color: var(--header-color);
 
-    transition: color 500ms;
+    transition: color $theme-variant-transition-time;
 
     &__title
     {
@@ -94,12 +96,12 @@ html, body
     bottom: 0;
 
     width: 95%;
-    
+
     padding: 8px 2.5%;
 
     color: var(--footer-color);
 
-    transition: color 500ms;
+    transition: color $theme-variant-transition-time;
 
     div
     {
@@ -143,7 +145,7 @@ html, body
 
     cursor: pointer;
 
-    transition: background 500ms;
+    transition: background $theme-variant-transition-time;
 
     &__slider
     {
@@ -159,7 +161,7 @@ html, body
 
         background: var(--page-background-color);
 
-        transition: left 500ms, background 500ms;
+        transition: left 500ms, background $theme-variant-transition-time;
     }
 
     &--active
