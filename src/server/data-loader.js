@@ -61,7 +61,8 @@ function __parseProject(projectPath)
             __projects_rel.set(project.id, project.redirect.substring(1));
     }
 
-    __projects.set(project.id, project);
+    if(!invalid)
+        __projects.set(project.id, project);
 }
 
 /**
@@ -84,7 +85,7 @@ function __validateProjectRels()
 {
     for(const [id, dep] of __projects_rel)
     {
-        if(!__projects.has(id) && !__projects.has(dep))
+        if(!__projects.has(id) || !__projects.has(dep))
         {
             Core.logger.log(Core.LOG_LEVEL.WARN, `Invalid redirect target for ${id}: ${dep} is not a valid project ID. Skipping project`);
 
