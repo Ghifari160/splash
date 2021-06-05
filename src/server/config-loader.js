@@ -6,7 +6,7 @@
 
 const fs = require("fs");
 const semver = require("semver");
-const uuid = require("uuid");
+const { v4: uuidv4 } = require("uuid");
 
 const Core = require("./core");
 
@@ -124,7 +124,7 @@ function __sanitizeConfigObj_instance(config)
         }
         else
         {
-            config.instance.id = uuid.v4();
+            config.instance.id = uuidv4();
             message += "Generating a random ID.";
         }
 
