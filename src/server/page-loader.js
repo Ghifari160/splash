@@ -34,7 +34,7 @@ let pagesById = [];
  */
 function loadPage(path, id)
 {
-    if(id === "undefined")
+    if(typeof id === "undefined")
         id = path;
 
     try
