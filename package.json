@@ -13,6 +13,7 @@
     "stop": "pkill -SIGTERM Splash",
     "test": "npm run test:unit",
     "test:unit": "mocha 'test/server/*.js'",
+    "test:live": "mocha 'test/live/*.js'",
     "pages:dev": "webpack-dev-server --mode development",
     "pages:webpack-build": "webpack --mode production",
     "pages:script-build": "node script/build-pages.js",
