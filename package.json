@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "node src/server",
+    "stop": "pkill -SIGTERM Splash",
     "pages:dev": "webpack-dev-server --mode development",
     "pages:webpack-build": "webpack --mode production",
     "pages:script-build": "node script/build-pages.js",

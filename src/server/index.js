@@ -205,6 +205,8 @@ function __init_checkForNHRChanges()
  */
 function __init()
 {
+    process.title = "Splash";
+
     Core.init_logger();
 
     if(server_init)
