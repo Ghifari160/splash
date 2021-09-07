@@ -18,7 +18,6 @@
     "pages:webpack-build": "webpack --mode production",
     "pages:script-build": "node script/build-pages.js",
     "pages:build": "npm run pages:webpack-build && npm run pages:script-build",
-    "package:tar:dev": "./script/tar-dev-gz.sh",
     "browserslist:update": "npx browserslist@latest --update-db",
     "disabled:doc:dev": "jsdoc . -c jsdoc.json -p",
     "disabled:doc:build": "jsdoc . -c jsdoc.json"

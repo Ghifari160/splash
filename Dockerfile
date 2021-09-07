@@ -39,7 +39,12 @@ FROM base AS dev
 
 ENV SPLASH_INSTANCE_ID "/dev/con"
 
-ADD splash.tar.gz /var/www/splash
+COPY src/server /var/www/splash/src/server
+COPY test /var/www/splash/test
+COPY default /var/www/splash/default
+
+COPY package-lock.json /var/www/splash/package-lock.json
+COPY package.json /var/www/splash/package.json
 
 WORKDIR /var/www/splash
 RUN mkdir data

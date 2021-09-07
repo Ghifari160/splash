@@ -1,0 +1,12 @@
+node_modules/
+data/
+data.old/
+dist/
+docs/
+config.json
+*.tar.*
+*.zip
+.DS_Store
+Thumbs.db
+
+docker/
