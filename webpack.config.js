@@ -1,6 +1,5 @@
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
@@ -9,17 +8,20 @@ module.exports =  (env, options) => {
 
     return {
         entry: "./src/pages/js/index.js",
-        output: {
+        output:
+        {
             filename: "app.js",
-            path: path.resolve(__dirname, "dist")
+            path: path.resolve(__dirname, "dist"),
         },
-        module: {
+        module:
+        {
             rules: [
                 {
                     test: /.(js|jsx)$/,
                     exclude: /node_modules/,
-                    use: {
-                        loader: "babel-loader"
+                    use:
+                    {
+                        loader: "babel-loader",
                     }
                 },
                 {
@@ -28,14 +30,18 @@ module.exports =  (env, options) => {
                         isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
                         {
                             loader: "css-loader",
-                            options: {
-                                sourceMap: isDevelopment
+                            options:
+                            {
+                                sourceMap: isDevelopment,
                             }
                         },
                         {
                             loader: "sass-loader",
-                            options: {
-                                sourceMap: isDevelopment
+                            options:
+                            {
+                                sourceMap: isDevelopment,
+                                implementation: require("sass"),
+                                sassOptions: { fiber: false },
                             }
                         }
                     ]
