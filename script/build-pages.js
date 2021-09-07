@@ -84,7 +84,7 @@ for(let i = 0; i < webpackConfig.plugins.length; i++)
         cssBasenameStack.push(webpackConfig.plugins[i].options.filename);
     }
     else if(webpackConfig.plugins[i] instanceof HtmlWebpackPlugin)
-        htmlQ.push(path.resolve(webpackConfig.output.path, webpackConfig.plugins[i].options.filename));
+        htmlQ.push(path.resolve(webpackConfig.output.path, webpackConfig.plugins[i].userOptions.filename));
 }
 
 logger.log(Logger.LOG_LEVEL.INFO, `Found ${jsStack.length} script(s), ${cssStack.length} stylesheet(s), and ${htmlQ.length} HTML(s)!`);

@@ -57,12 +57,14 @@ module.exports =  (env, options) => {
             new HtmlWebPackPlugin({
                 template: "./src/pages/error.html",
                 filename: "error.html",
-                inject: "head"
+                inject: "head",
+                scriptLoading: "blocking",
             }),
             new HtmlWebPackPlugin({
                 template: "./src/pages/splash.html",
                 filename: "splash.html",
-                inject: "head"
+                inject: "head",
+                scriptLoading: "blocking",
             })
         ]
     };
