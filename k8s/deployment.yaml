@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: splash
+  labels:
+    app: splash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splash
+  template:
+    metadata:
+      labels:
+        app: splash
+    spec:
+      containers:
+      - name: splash
+        image: ghifari160/splash:0.5.0
+        ports:
+        - containerPort: 8080
