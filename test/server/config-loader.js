@@ -3,7 +3,7 @@ const path = require("path");
 const assert = require("assert");
 const { validate: uuidValidate, version: uuidVersion } = require("uuid");
 
-const current_version = "0.5.0";
+const current_version = "0.5.1";
 
 const configLoc = path.resolve(__dirname, "../../config.json");
 const configLoc_legacy = path.resolve(__dirname, "../../data/config.json");

@@ -29,6 +29,6 @@ spec:
     spec:
       containers:
       - name: splash
-        image: ghifari160/splash:0.5.0
+        image: ghifari160/splash:0.5.1
         ports:
         - containerPort: 8080
