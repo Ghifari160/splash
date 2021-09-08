@@ -63,7 +63,7 @@ FROM base
 
 LABEL org.opencontainers.image.authors="GHIFARI160 <ghifari@ghifari160.com>"
 
-RUN curl -sL https://projects.gassets.space/splash/v0.4.0/splash-v0.4.0.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
+RUN curl -sL https://projects.gassets.space/splash/v0.5.0/splash-v0.5.0.tar.gz | tar -zxvf - -C /var/www/splash --overwrite
 
 WORKDIR /var/www/splash
 RUN mkdir data

@@ -12,7 +12,7 @@ const Core = require("./core");
 
 const legacy_config_location = "data/config.json";
 const config_location = "config.json";
-const version_current = "0.4.0";
+const version_current = "0.5.0";
 
 /**
  * Sanitizes config version object
