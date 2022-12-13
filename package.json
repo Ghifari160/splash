@@ -41,7 +41,7 @@
     "webpack-dev-server": "^4.1.1"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "logger": "https://github.com/Ghifari160/logger#90812f1d3e974f5e1680663a000f49f1aaa7b92a",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
